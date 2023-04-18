@@ -33,6 +33,10 @@ class Attachment(models.Model):
     residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE)
     image = models.ImageField("Attachment", upload_to='attachments/')
 
+    class Meta:
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
 class Cluster(models.Model):
     name = models.CharField(max_length=50)
     residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE)
