@@ -1,9 +1,10 @@
 from django.shortcuts import render
 
 from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from residence.models import User
+from .models import User
 from .serializers import UserSerializer
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -13,13 +14,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data.get('first_name', ''),
-        )
-        user.set_password(validated_data['password'])
-        user.save()
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        headers = self.get_success_headers(serializer.data)
 
-        return user
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
