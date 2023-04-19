@@ -30,8 +30,10 @@ INSTALLED_APPS = [
     # third party apps
     'drf_yasg',
     'rest_framework',
+    'rest_framework_simplejwt',
     # django apps
-    'residence'
+    'residence',
+    'service'
 ]
 
 MIDDLEWARE = [
@@ -121,12 +123,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'residence.User'
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissions'
