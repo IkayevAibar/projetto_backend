@@ -120,6 +120,7 @@ class ApartmentViewSet(viewsets.ModelViewSet):
 class LayoutViewSet(viewsets.ModelViewSet):
     queryset = Layout.objects.all()
     serializer_class = LayoutSerializer
+    parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
 
 class AttachmentViewSet(viewsets.ModelViewSet):

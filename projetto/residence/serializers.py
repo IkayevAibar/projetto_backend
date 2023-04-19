@@ -28,6 +28,7 @@ class FloorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LayoutSerializer(serializers.ModelSerializer):
+    pdf = serializers.FileField(max_length=None, allow_empty_file=False, use_url=True)
     class Meta:
         model = Layout
         fields = '__all__'
