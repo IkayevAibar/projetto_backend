@@ -26,7 +26,7 @@ class Attachment(models.Model):
 
 class Cluster(models.Model):
     name = models.CharField(max_length=50)
-    residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE)
+    residence_id = models.ForeignKey("Residence", related_name='clusters', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Пятно'
@@ -46,7 +46,7 @@ class Cluster(models.Model):
 
 class Floor(models.Model):
     number = models.IntegerField()
-    cluster = models.ForeignKey(Cluster, on_delete=models.CASCADE)
+    cluster = models.ForeignKey(Cluster, related_name='floors', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Этаж'
@@ -57,7 +57,7 @@ class Floor(models.Model):
 class Apartment(models.Model):
     number = models.IntegerField()
     area = models.FloatField()
-    floor = models.ForeignKey(Floor, on_delete=models.CASCADE)
+    floor = models.ForeignKey(Floor, related_name='apartments', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Квартира'
@@ -68,7 +68,7 @@ class Apartment(models.Model):
 class Layout(models.Model):
     name = models.CharField(max_length=150)
     pdf = models.FileField("PDF", upload_to="PDF/")
-    apartment = models.ForeignKey(Apartment, on_delete=models.CASCADE)
+    apartment = models.ForeignKey(Apartment, related_name='layouts', on_delete=models.CASCADE)
     price = models.CharField(max_length=10)
 
     class Meta:
