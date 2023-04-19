@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -12,6 +14,7 @@ from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSer
 class ResidenceViewSet(viewsets.ModelViewSet):
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
+    permission_classes = [AllowAny]
 
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):
@@ -23,6 +26,7 @@ class ResidenceViewSet(viewsets.ModelViewSet):
 class ClusterViewSet(viewsets.ModelViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
+    permission_classes = [AllowAny]
 
     @action(detail=True, methods=['get'])
     def floors(self, request, pk=None):
@@ -34,6 +38,7 @@ class ClusterViewSet(viewsets.ModelViewSet):
 class FloorViewSet(viewsets.ModelViewSet):
     queryset = Floor.objects.all()
     serializer_class = FloorSerializer
+    permission_classes = [AllowAny]
     
     @action(detail=True, methods=['get'])
     def apartments(self, request, pk=None):
@@ -72,6 +77,7 @@ class FloorViewSet(viewsets.ModelViewSet):
 class ApartmentViewSet(viewsets.ModelViewSet):
     queryset = Apartment.objects.all()
     serializer_class = ApartmentSerializer
+    permission_classes = [AllowAny]
 
     @action(detail=True, methods=['get'])
     def layouts(self, request, pk=None):
@@ -114,7 +120,10 @@ class ApartmentViewSet(viewsets.ModelViewSet):
 class LayoutViewSet(viewsets.ModelViewSet):
     queryset = Layout.objects.all()
     serializer_class = LayoutSerializer
+    permission_classes = [AllowAny]
 
 class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [AllowAny]

@@ -12,7 +12,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AttachmentSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(max_length=None, use_url=True)
+    image = serializers.ImageField(max_length=None, allow_empty_file=False, use_url=True)
     class Meta:
         model = Attachment
         fields = '__all__'
