@@ -1,20 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser,UserManager as BaseUserAdmin
 from django.utils import timezone
 
-from .managers import UserManager
 
-class User(AbstractUser):
-    email = None 
-    REQUIRED_FIELDS = []
-
-    objects = UserManager()
-
-    def __str__(self):
-        return "%d.%s" % (self.id, self.username)
-    class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
 
 class Residence(models.Model):
     title = models.CharField(max_length=150)
