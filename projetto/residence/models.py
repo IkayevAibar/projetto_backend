@@ -18,6 +18,7 @@ class Residence(models.Model):
     
 class Attachment(models.Model):
     residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
     image = models.ImageField("Attachment", upload_to='attachments/')
 
     class Meta:

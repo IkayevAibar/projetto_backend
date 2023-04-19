@@ -1,3 +1,4 @@
 /venv
 
-**/migrations/
+projetto/**/migrations/
+projetto/db.sqlite3
