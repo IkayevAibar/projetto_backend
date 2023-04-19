@@ -11,6 +11,6 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
     
     def validate_username(self, value):
-        if not re.match(r'^\+[0-9][0-9]+\w+', value):
-            raise serializers.ValidationError('Username must start with "+" and contain only digits and letters.')
+        if not re.match(r'^\+[0-9]+$', value):
+            raise serializers.ValidationError('User\'s phone must start with "+" and contain only digits.')
         return value
