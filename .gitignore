@@ -2,3 +2,5 @@
 
 projetto/**/migrations/
 projetto/db.sqlite3
+
+.env
