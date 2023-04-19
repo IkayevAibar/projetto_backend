@@ -59,14 +59,14 @@ class Floor(models.Model):
 
 
 class Apartment(models.Model):
-    number = models.IntegerField()
+    room_number = models.IntegerField()
     area = models.FloatField()
     floor = models.ForeignKey(Floor, related_name='apartments', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Квартира'
         verbose_name_plural = 'Квартиры'
-        ordering = ['number']
+        ordering = ['id']
 
 
 class Layout(models.Model):
@@ -74,10 +74,12 @@ class Layout(models.Model):
     pdf = models.FileField("PDF", upload_to="PDF/")
     apartment = models.ForeignKey(Apartment, related_name='layouts', on_delete=models.CASCADE)
     price = models.CharField(max_length=10)
+    description = models.TextField(max_length=2500)
+
 
     class Meta:
         verbose_name = 'Планировка'
         verbose_name_plural = 'Планировки'
-        ordering = ['name']
+        ordering = ['id']
 
 
