@@ -1,6 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout
 from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer, LayoutSerializer
@@ -30,12 +34,39 @@ class ClusterViewSet(viewsets.ModelViewSet):
 class FloorViewSet(viewsets.ModelViewSet):
     queryset = Floor.objects.all()
     serializer_class = FloorSerializer
-
+    
     @action(detail=True, methods=['get'])
     def apartments(self, request, pk=None):
         floor = self.get_object()
         apartments = floor.apartments.all()
         serializer = ApartmentSerializer(apartments, many=True)
+        return Response(serializer.data)
+    
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('residence_id', openapi.IN_QUERY, description="ID of the residence", type=openapi.TYPE_INTEGER),
+        openapi.Parameter('cluster_id', openapi.IN_QUERY, description="ID of the cluster", type=openapi.TYPE_INTEGER),
+    ])
+    def list(self, request, *args, **kwargs):
+        # Получаем переданные параметры из запроса
+        residence_id = request.query_params.get('residence_id')
+        cluster_id = request.query_params.get('cluster_id')
+
+        # Проверяем, что оба параметра переданы
+        if not (residence_id and cluster_id):
+            return Response({'detail': 'residence_id and cluster_id query params are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получаем соответствующий Residence и Cluster
+        try:
+            residence = Residence.objects.get(id=residence_id)
+            cluster = Cluster.objects.get(id=cluster_id, residence_id=residence)
+        except (Residence.DoesNotExist, Cluster.DoesNotExist):
+            return Response({'detail': 'Residence or Cluster not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Фильтруем этажи по переданным параметрам
+        floors = self.queryset.filter(cluster=cluster)
+
+        # Сериализуем и возвращаем результат
+        serializer = self.serializer_class(floors, many=True)
         return Response(serializer.data)
 
 class ApartmentViewSet(viewsets.ModelViewSet):
@@ -47,6 +78,37 @@ class ApartmentViewSet(viewsets.ModelViewSet):
         apartment = self.get_object()
         layouts = apartment.layouts.all()
         serializer = LayoutSerializer(layouts, many=True)
+        return Response(serializer.data)
+    
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('residence_id', openapi.IN_QUERY, description="ID of the residence", type=openapi.TYPE_INTEGER),
+        openapi.Parameter('cluster_id', openapi.IN_QUERY, description="ID of the cluster", type=openapi.TYPE_INTEGER),
+        openapi.Parameter('floor_id', openapi.IN_QUERY, description="ID of the floor", type=openapi.TYPE_INTEGER),
+    ])
+    def list(self, request, *args, **kwargs):
+        # Получаем переданные параметры из запроса
+        residence_id = request.query_params.get('residence_id')
+        cluster_id = request.query_params.get('cluster_id')
+        floor_id = request.query_params.get('floor_id')
+
+        # Проверяем, что оба параметра переданы
+        if not (residence_id and cluster_id and floor_id):
+            return Response({'detail': 'residence_id and cluster_id and floor_id query params are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Получаем соответствующий Residence и Cluster
+        try:
+            residence = Residence.objects.get(id=residence_id)
+            cluster = Cluster.objects.get(id=cluster_id, residence_id=residence)
+            floor = Floor.objects.get(id=floor_id, cluster_id=cluster)
+        except (Residence.DoesNotExist, Cluster.DoesNotExist, Floor.DoesNotExist):
+            return Response({'detail': 'Residence or Cluster or Floor not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Фильтруем этажи по переданным параметрам
+        apartments = self.queryset.filter(floor_id=floor)
+
+        # Сериализуем и возвращаем результат
+        serializer = self.serializer_class(apartments, many=True)
+
         return Response(serializer.data)
 
 class LayoutViewSet(viewsets.ModelViewSet):

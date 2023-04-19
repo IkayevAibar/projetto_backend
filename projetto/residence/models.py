@@ -32,6 +32,9 @@ class Cluster(models.Model):
         verbose_name = 'Пятно'
         verbose_name_plural = 'Пятны'
         ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.name} из {self.residence_id.title}"
 
 # class Block(models.Model):
 #     name = models.CharField(max_length=150)
