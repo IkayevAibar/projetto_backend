@@ -1,6 +1,8 @@
 /venv
 
 projetto/**/migrations/
+projetto/**/__pycache__/
+projetto/media/**
 projetto/db.sqlite3
 
 .env
