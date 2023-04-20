@@ -1,7 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -11,10 +10,18 @@ from drf_yasg.utils import swagger_auto_schema
 from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout
 from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer, LayoutSerializer
 
+class ResidenceFilter(filters.FilterSet):
+    name = filters.CharFilter(field_name='name')
+
+    class Meta:
+        model = Residence
+        fields = ['name']
+
 class ResidenceViewSet(viewsets.ModelViewSet):
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
     permission_classes = [AllowAny]
+    filterset_class = ResidenceFilter
 
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):
