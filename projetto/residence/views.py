@@ -17,7 +17,7 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     serializer_class = ResidenceSerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
+    filterset_fields = ['title']
 
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):
