@@ -17,9 +17,16 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     serializer_class = ResidenceSerializer
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['city']
+    filterset_fields = ['city', 'city__name']
     search_fields = ['title', 'city__name']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.query_params.get('search', None)
+        if search_query:
+            queryset = queryset.filter(Q(title__icontains=search_query))
+        return queryset
+    
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):
         residence = self.get_object()
