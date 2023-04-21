@@ -12,6 +12,7 @@ from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSer
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+from django.db.models import Q
 class ResidenceViewSet(viewsets.ModelViewSet):
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
