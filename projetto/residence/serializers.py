@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City
 
 class ResidenceSerializer(serializers.ModelSerializer):
+    city_name = serializers.StringRelatedField(source='city.name')
     class Meta:
         model = Residence
         fields = '__all__'
