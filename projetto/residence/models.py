@@ -1,13 +1,23 @@
 from django.db import models
 from django.utils import timezone
 
+class City(models.Model):
+    initials = models.CharField(max_length=3)
+    name = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name = 'Город'
+        verbose_name_plural = 'Города'
+    
+    def __str__(self):
+        return f"{self.initials} {self.name}"
 
 class Residence(models.Model):
+    
     title = models.CharField(max_length=150)
     description = models.TextField(max_length=2500)
     exploitation_date = models.DateField(default=timezone.now)
-    
+    city = models.ForeignKey(City, on_delete=models.CASCADE , default=2)
     class Meta:
         verbose_name = 'Жилой комплекс'
         verbose_name_plural = 'Жилые комплексы'
