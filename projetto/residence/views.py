@@ -7,8 +7,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout
-from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer, LayoutSerializer
+from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City
+from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer, LayoutSerializer, CitySerializer
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -131,4 +131,10 @@ class AttachmentViewSet(viewsets.ModelViewSet):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [AllowAny]
+
+
+class CityViewSet(viewsets.ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
     permission_classes = [AllowAny]

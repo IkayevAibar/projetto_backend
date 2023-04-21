@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout
+from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City
 
 class ResidenceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,5 +31,10 @@ class LayoutSerializer(serializers.ModelSerializer):
     pdf = serializers.FileField(max_length=None, allow_empty_file=False, use_url=True)
     class Meta:
         model = Layout
+        fields = '__all__'
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
         fields = '__all__'
 

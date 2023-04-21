@@ -14,7 +14,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
 from service.views import UserViewSet
-from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, LayoutViewSet
+from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, LayoutViewSet, CityViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -24,6 +24,7 @@ router.register(r'clusters', ClusterViewSet)
 router.register(r'floors', FloorViewSet)
 router.register(r'apartments', ApartmentViewSet)
 router.register(r'layouts', LayoutViewSet)
+router.register(r'cities', CityViewSet)
 
 schema_view = get_schema_view(
    openapi.Info(
