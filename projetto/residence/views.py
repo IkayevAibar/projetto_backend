@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
@@ -16,8 +16,9 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
     permission_classes = [AllowAny]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['title']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['city']
+    search_fields = ['title', 'city__name']
 
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):

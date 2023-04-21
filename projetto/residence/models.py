@@ -13,7 +13,6 @@ class City(models.Model):
         return f"{self.initials} {self.name}"
 
 class Residence(models.Model):
-    
     title = models.CharField(max_length=150)
     description = models.TextField(max_length=2500)
     exploitation_date = models.DateField(default=timezone.now)
