@@ -1,6 +1,17 @@
 version: "3.9"
 
 services:
+  db:
+      image: postgres:latest
+      restart: always
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: zxczxc123
+        POSTGRES_DB: projetto_db
+      ports:
+        - "5432:5432"
+      volumes:
+        - ./data:/var/lib/postgresql/data
   web:
     build: .
     ports:
