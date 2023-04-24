@@ -6,6 +6,7 @@ __pycache__/
 projetto/**/migrations/
 projetto/**/__pycache__/
 projetto/media/**
+projetto/static/**
 projetto/db.sqlite3
 
 .env
