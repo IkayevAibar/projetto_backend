@@ -3,14 +3,14 @@ from django.utils import timezone
 
 
 class Timestamp(models.Model):
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         abstract = True
 
 class City(Timestamp):
-    initials = models.CharField(max_length=3)
-    name = models.CharField(max_length=50)
+    initials = models.CharField(max_length=3, blank=True)
+    name = models.CharField(max_length=50, blank=True)
 
     class Meta:
         verbose_name = 'Город'
@@ -20,10 +20,10 @@ class City(Timestamp):
         return f"{self.initials} {self.name}"
 
 class Residence(Timestamp):
-    title = models.CharField(max_length=150)
-    description = models.TextField(max_length=2500)
+    title = models.CharField(max_length=150, blank=True)
+    description = models.TextField(max_length=2500, blank=True)
     exploitation_date = models.DateField(default=timezone.now)
-    city = models.ForeignKey(City, on_delete=models.CASCADE , default=2)
+    city = models.ForeignKey(City, on_delete=models.CASCADE , default=2, blank=True)
     class Meta:
         verbose_name = 'Жилой комплекс'
         verbose_name_plural = 'Жилые комплексы'
@@ -33,17 +33,17 @@ class Residence(Timestamp):
         return f"{self.title}"
     
 class Attachment(Timestamp):
-    residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    image = models.ImageField("Attachment", upload_to='attachments/')
+    residence_id = models.ForeignKey("Residence", on_delete=models.CASCADE, blank=True)
+    name = models.CharField(max_length=100, blank=True)
+    image = models.ImageField("Attachment", upload_to='attachments/', blank=True)
 
     class Meta:
         verbose_name = 'Вложение'
         verbose_name_plural = 'Вложении'
 
 class Cluster(Timestamp):
-    name = models.CharField(max_length=50)
-    residence_id = models.ForeignKey("Residence", related_name='clusters', on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, blank=True)
+    residence_id = models.ForeignKey("Residence", related_name='clusters', on_delete=models.CASCADE, blank=True)
 
     class Meta:
         verbose_name = 'Пятно'
@@ -55,8 +55,8 @@ class Cluster(Timestamp):
 
 
 class Floor(Timestamp):
-    number = models.IntegerField()
-    cluster = models.ForeignKey(Cluster, related_name='floors', on_delete=models.CASCADE)
+    number = models.IntegerField("Номер Этажа", blank=True)
+    cluster = models.ForeignKey(Cluster, related_name='floors', on_delete=models.CASCADE, blank=True)
 
     class Meta:
         verbose_name = 'Этаж'
@@ -65,9 +65,9 @@ class Floor(Timestamp):
 
 
 class Apartment(Timestamp):
-    room_number = models.IntegerField()
-    area = models.FloatField()
-    floor = models.ForeignKey(Floor, related_name='apartments', on_delete=models.CASCADE)
+    room_number = models.IntegerField("Номер квартиры", blank=True)
+    area = models.FloatField("Размер квартиры", blank=True)
+    floor = models.ForeignKey(Floor, related_name='apartments', on_delete=models.CASCADE, blank=True)
 
     class Meta:
         verbose_name = 'Квартира'
@@ -76,11 +76,11 @@ class Apartment(Timestamp):
 
 
 class Layout(Timestamp):
-    name = models.CharField(max_length=150)
-    pdf = models.FileField("PDF", upload_to="PDF/")
-    apartment = models.ForeignKey(Apartment, related_name='layouts', on_delete=models.CASCADE)
-    price = models.CharField(max_length=10)
-    description = models.TextField(max_length=2500)
+    name = models.CharField(max_length=150, blank=True)
+    pdf = models.FileField("PDF", upload_to="PDF/", blank=True)
+    apartment = models.ForeignKey(Apartment, related_name='layouts', on_delete=models.CASCADE, blank=True)
+    price = models.CharField(max_length=10, blank=True)
+    description = models.TextField(max_length=2500, blank=True)
 
 
     class Meta:
@@ -90,9 +90,9 @@ class Layout(Timestamp):
 
 
 class Ticket(Timestamp):
-    full_name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15)
-    email = models.CharField(max_length=30)
+    full_name = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.CharField(max_length=30, blank=True)
     description = models.TextField(max_length=1000, null=True, blank=True)
 
     class Meta:
@@ -101,11 +101,11 @@ class Ticket(Timestamp):
         ordering = ['created_at']
 
 class TicketAttachment(Timestamp):
-    ticket = models.ForeignKey("Ticket", on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    file = models.FileField("Screenshot", upload_to='tickets/')
-
+    ticket = models.ForeignKey("Ticket", on_delete=models.CASCADE, blank=True)
+    name = models.CharField(max_length=100, blank=True)
+    file = models.FileField("Screenshot", upload_to='tickets/', blank=True)
 
     class Meta:
         verbose_name = 'Вложение для Тикета'
         verbose_name_plural = 'Вложении  для Тикета'
+
