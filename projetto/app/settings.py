@@ -213,3 +213,7 @@ SWAGGER_SETTINGS = {
 #         'user': 'app.serializers.UserSerializer',
 #     },
 # }
+
+account_sid = os.getenv('SMS_ACC_SID')
+auth_token = os.getenv('SMS_AUTH_TOKEN')
+verify_sid = os.getenv('SMS_VER_SID')

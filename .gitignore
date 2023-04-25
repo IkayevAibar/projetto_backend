@@ -15,3 +15,4 @@ projetto/db.sqlite3
 *.log
 *.pot
 
+twilio_test.py

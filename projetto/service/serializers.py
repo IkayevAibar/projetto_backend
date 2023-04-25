@@ -14,3 +14,10 @@ class UserSerializer(serializers.ModelSerializer):
         if not re.match(r'^\+[0-9]+$', value):
             raise serializers.ValidationError('User\'s phone must start with "+" and contain only digits.')
         return value
+
+class SendSMSRequestSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(required=True)
+
+class VerifySMSRequestSerializer(serializers.Serializer):
+    otp_code = serializers.CharField(required=True)
+    phone_number = serializers.CharField(required=True)
