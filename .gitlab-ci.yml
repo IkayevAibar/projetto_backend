@@ -1,4 +1,4 @@
-image: python:3.11
+# image: python:3.11
 
 stages:
   - deploy
@@ -8,8 +8,8 @@ deploy:
   script:
     - git pull origin master
     - pip install -r requirements.txt
-    - python manage.py makemigrations
-    - python manage.py migrate
+    - python projetto/manage.py makemigrations
+    - python projetto/manage.py migrate
 
 # stages:
 #   - build
