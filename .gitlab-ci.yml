@@ -10,6 +10,8 @@ deploy:
     - pip install -r requirements.txt
     - python projetto/manage.py makemigrations
     - python projetto/manage.py migrate
+  volumes:
+    - /projetto/.env:ro
 
 # stages:
 #   - build
