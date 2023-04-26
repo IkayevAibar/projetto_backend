@@ -1,20 +1,31 @@
 image: python:3.11
 
 stages:
-  - build
   - deploy
-
-build:
-  stage: build
-  script:
-    - pip install -r requirements.txt
-    - python manage.py collectstatic
-    - python manage.py build
-  artifacts:
-    paths:
-      - build/
 
 deploy:
   stage: deploy
   script:
-    - rsync -avz --delete C:\Users\aibar\OneDrive\Рабочий стол\job\projetto_backend root@178.128.243.89:/home/projetto_backend/
+    - git pull
+    - pip install -r requirements.txt
+    - python manage.py makemigrations
+    - python manage.py migrate
+
+# stages:
+#   - build
+#   - deploy
+
+# build:
+#   stage: build
+#   script:
+#     - pip install -r requirements.txt
+#     - python manage.py collectstatic
+#     - python manage.py build
+#   artifacts:
+#     paths:
+#       - build/
+
+# deploy:
+#   stage: deploy
+#   script:
+#     - rsync -avz --delete C:\Users\aibar\OneDrive\Рабочий стол\job\projetto_backend root@178.128.243.89:/home/projetto_backend/
