@@ -19,7 +19,7 @@ class ResidenceViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['city']
-    search_fields = ['title', '^title', '=title', '=city__name']
+    search_fields = ['title', '^title', '=title']
 
     def get_queryset(self):
         queryset = super().get_queryset()
