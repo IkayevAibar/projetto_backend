@@ -31,6 +31,6 @@ deploy:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name projetto $TAG_COMMIT"
   environment:
     name: production
-    url: http://projetto.dev.thefactory.kz
+    url: 178.128.243.89
   only:
     - master
