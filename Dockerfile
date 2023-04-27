@@ -13,4 +13,4 @@ COPY ./projetto  /projetto
 
 # Запуск приложения
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app.wsgi:application"]
