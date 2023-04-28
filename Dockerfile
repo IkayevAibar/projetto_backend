@@ -7,6 +7,8 @@ WORKDIR /projetto
 # Установка зависимостей
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+# RUN python manage.py makemigrations
+# RUN python manage.py migrate
 
 # Копирование кода приложения
 COPY ./projetto  /projetto
