@@ -54,13 +54,12 @@ class ResidenceViewSet(viewsets.ModelViewSet):
                 for apartment in apartments:
                     apartments_list.append({
                         'id': apartment.id,
-                        'name': apartment.name,
+                        'room_number': apartment.room_number,
                         'area': apartment.area,
-                        'rooms': apartment.rooms,
                     })
                 floors_list.append({
                     'id': floor.id,
-                    'name': floor.name,
+                    'number': floor.number,
                     'apartments': apartments_list
                 })
             tree.append({
