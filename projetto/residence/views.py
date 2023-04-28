@@ -38,6 +38,38 @@ class ResidenceViewSet(viewsets.ModelViewSet):
         clusters = residence.clusters.all()
         serializer = ClusterSerializer(clusters, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def get_residence_tree(self, request, pk=None):
+        residence = self.get_object()
+        clusters = residence.clusters.all()
+
+        tree = []
+        for cluster in clusters:
+            floors = cluster.floors.all()
+            floors_list = []
+            for floor in floors:
+                apartments = floor.apartments.all()
+                apartments_list = []
+                for apartment in apartments:
+                    apartments_list.append({
+                        'id': apartment.id,
+                        'name': apartment.name,
+                        'area': apartment.area,
+                        'rooms': apartment.rooms,
+                    })
+                floors_list.append({
+                    'id': floor.id,
+                    'name': floor.name,
+                    'apartments': apartments_list
+                })
+            tree.append({
+                'id': cluster.id,
+                'name': cluster.name,
+                'floors': floors_list,
+            })
+
+        return Response(tree)
 
 class ClusterViewSet(viewsets.ModelViewSet):
     queryset = Cluster.objects.all()
