@@ -35,6 +35,14 @@ class UserViewSet(viewsets.ModelViewSet):
     
         return [permission() for permission in permission_classes]
     
+    # @swagger_auto_schema(
+    #     operation_description='Retrieve user by ID'
+    # )
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
+    
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
