@@ -1,7 +1,5 @@
 stages:
   - semgrep
-  - publish
-  - deploy
 
 variables:
   TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
