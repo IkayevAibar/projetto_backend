@@ -4,6 +4,7 @@ stages:
 variables:
   TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
+  SEMGREP_APP_TOKEN: 0c21e969d4360babb8cd50edf73853bfb0285e76a4419727b755ccbc7c772a7b
 
 publish:
   image: docker:latest
@@ -43,6 +44,3 @@ semgrep:
   - if: $CI_PIPELINE_SOURCE == "web"  # allow triggering a scan manually from the gitlab UI
   - if: $CI_MERGE_REQUEST_IID
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  variables:
-    
-    SEMGREP_APP_TOKEN: $SEMGREP_APP_TOKEN
