@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.exceptions import ValidationError
 
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
@@ -16,9 +18,11 @@ from drf_yasg.utils import swagger_auto_schema
 
 from .permissions import IsAuthenticatedOrAdminOrReadOnly
 from .models import User
-from .serializers import UserSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer
+from .serializers import UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, TokenObtainPairSerializerWithoutPassword
 from app.settings import account_sid, auth_token, verify_sid
 
+class TokenObtainPairWithoutPasswordView(TokenViewBase):
+    serializer_class = TokenObtainPairSerializerWithoutPassword
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -26,7 +30,16 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        elif self.action in 'send_sms':
+            return SendSMSRequestSerializer
+        elif self.action in 'verify_sms':
+            return VerifySMSRequestSerializer
+        
+        # Возврат базового сериализатора по умолчанию
+        return UserSerializer
     def get_permissions(self):
         if self.action in ['create', 'send_sms', 'verify_sms']:
             permission_classes = [AllowAny]
@@ -35,24 +48,63 @@ class UserViewSet(viewsets.ModelViewSet):
     
         return [permission() for permission in permission_classes]
     
-    # @swagger_auto_schema(
-    #     operation_description='Retrieve user by ID'
-    # )
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     serializer = self.get_serializer(instance)
-    #     return Response(serializer.data)
-    
+    @swagger_auto_schema(
+        method='get',
+        operation_summary='Get user by phone',
+        operation_description='Retrieve a user by phone number.',
+        manual_parameters=[
+            openapi.Parameter(
+                name='phone',
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description='Phone number of the user.',
+                required=True
+            )
+        ],
+        responses={
+            200: UserSerializer,
+            404: 'User not found.'
+        }
+    )
+    @action(detail=False, methods=['GET'])
+    def get_by_phone(self, request):
+        phone = request.query_params.get('phone')
+
+        try:
+            user = User.objects.get(username=phone)
+            serializer = self.get_serializer(user)
+
+            if user.check_password(''):
+                serializer.data['empty_password'] = True
+            else:
+                serializer.data['empty_password'] = False
+
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({'detail': 'Пользователя с таким номер нет'}, status=status.HTTP_404_NOT_FOUND)
+
     def create(self, request):
+        user_manager = User.objects
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        user.set_password(serializer.validated_data['password'])
-        user.save()
         
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
+        first_name = serializer.validated_data.get('first_name')
+        sms_verified = serializer.validated_data.get('sms_verified')
+        
+        if sms_verified == True:
+            user = user_manager.create_user(username=username, password=password, sms_verified=sms_verified, first_name=first_name)
+        else:
+            if(password):
+                user = user_manager.create_user(username=username, password=password, sms_verified=sms_verified, first_name=first_name)
+            else:
+                raise ValidationError("Password is required for user creation.") 
+
         headers = self.get_success_headers(serializer.data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     
     @swagger_auto_schema(
         request_body=VerifySMSRequestSerializer,
@@ -97,35 +149,3 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': verification.status})
 
-
-# class VerifySMSCode(APIView):
-#     permission_classes = [AllowAny]
-    
-#     @swagger_auto_schema(
-#         request_body=openapi.Schema(
-#             type='object',
-#             properties={
-#                 'phone_number': openapi.Schema(
-#                     type='string',
-#                     description='The phone number of the user',
-#                     example='+123456789'
-#                 )
-#             },
-#             required=['phone_number']
-#         )
-#     )
-#     def post(self, request):
-        
-#         verified_number = request.data.get('phone_number')
-#         otp_code = request.data.get('otp_code')
-        
-#         client = Client(account_sid, auth_token)
-
-#         verification_check = client.verify.v2.services(verify_sid) \
-#           .verification_checks \
-#           .create(to=verified_number, code=otp_code)
-        
-#         if verification_check.status == 'approved':
-#             return Response({'message': 'OTP code verified successfully'})
-#         else:
-#             return Response({'message': 'OTP code verification failed'})

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from drf_yasg import openapi
@@ -13,7 +13,8 @@ from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSer
 from django_filters.rest_framework import DjangoFilterBackend
 
 from django.db.models import Q
-class ResidenceViewSet(viewsets.ModelViewSet):
+class ResidenceViewSet(viewsets.ReadOnlyModelViewSet):
+    allowed_methods = ['get'] 
     queryset = Residence.objects.all()
     serializer_class = ResidenceSerializer
     permission_classes = [AllowAny]
@@ -70,7 +71,7 @@ class ResidenceViewSet(viewsets.ModelViewSet):
 
         return Response(tree)
 
-class ClusterViewSet(viewsets.ModelViewSet):
+class ClusterViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Cluster.objects.all()
     serializer_class = ClusterSerializer
     permission_classes = [AllowAny]
@@ -82,7 +83,7 @@ class ClusterViewSet(viewsets.ModelViewSet):
         serializer = FloorSerializer(floors, many=True)
         return Response(serializer.data)
 
-class FloorViewSet(viewsets.ModelViewSet):
+class FloorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Floor.objects.all()
     serializer_class = FloorSerializer
     permission_classes = [AllowAny]
@@ -121,7 +122,7 @@ class FloorViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(floors, many=True)
         return Response(serializer.data)
 
-class ApartmentViewSet(viewsets.ModelViewSet):
+class ApartmentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Apartment.objects.all()
     serializer_class = ApartmentSerializer
     permission_classes = [AllowAny]
@@ -164,20 +165,19 @@ class ApartmentViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-class LayoutViewSet(viewsets.ModelViewSet):
+class LayoutViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Layout.objects.all()
     serializer_class = LayoutSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
 
-class AttachmentViewSet(viewsets.ModelViewSet):
+class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Attachment.objects.all()
     serializer_class = AttachmentSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
 
-
-class CityViewSet(viewsets.ModelViewSet):
+class CityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     permission_classes = [AllowAny]

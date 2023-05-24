@@ -13,7 +13,7 @@ from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from service.views import UserViewSet
+from service.views import UserViewSet, TokenObtainPairWithoutPasswordView
 from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, LayoutViewSet, CityViewSet, TicketAttachmentViewSet, TicketViewSet
 
 router = DefaultRouter()
@@ -60,4 +60,5 @@ urlpatterns += [
 urlpatterns += [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/without-password/', TokenObtainPairWithoutPasswordView.as_view(), name='token_obtain_pair_without_password'),
 ]

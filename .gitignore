@@ -1,10 +1,11 @@
 /venv
 
-__pycache__/
+**/__pycache__
+__pycache__/**
 *.py[cod]
 
 projetto/**/migrations/
-projetto/**/__pycache__/
+projetto/**/__pycache__
 projetto/media/**
 projetto/static/**
 projetto/db.sqlite3
