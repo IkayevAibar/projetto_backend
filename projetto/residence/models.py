@@ -83,7 +83,6 @@ class Layout(Timestamp):
     price = models.CharField(max_length=10, blank=True)
     description = models.TextField(max_length=2500, blank=True)
 
-
     class Meta:
         verbose_name = 'Планировка'
         verbose_name_plural = 'Планировки'

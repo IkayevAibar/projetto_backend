@@ -17,3 +17,4 @@ projetto/db.sqlite3
 *.pot
 
 twilio_test.py
+freedom_test.py

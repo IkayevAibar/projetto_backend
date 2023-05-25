@@ -221,3 +221,7 @@ SWAGGER_SETTINGS = {
 account_sid = os.getenv('SMS_ACC_SID')
 auth_token = os.getenv('SMS_AUTH_TOKEN')
 verify_sid = os.getenv('SMS_VER_SID')
+
+payment_get = os.getenv('PAYMENT_GET')
+payment_give = os.getenv('PAYMENT_GIVE')
+
