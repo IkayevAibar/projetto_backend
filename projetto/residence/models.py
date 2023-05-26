@@ -87,6 +87,15 @@ class Layout(Timestamp):
         verbose_name = 'Планировка'
         verbose_name_plural = 'Планировки'
         ordering = ['id']
+    
+    def get_path_ids(self):
+        path_ids = {
+            "residence_id":self.apartment.floor.cluster.residence_id,
+            "cluster_id":self.apartment.floor.cluster_id,
+            "floor_id":self.apartment.floor_id,
+            "apartment_id":self.apartment_id
+        }
+        return path_ids
 
 
 class Ticket(Timestamp):

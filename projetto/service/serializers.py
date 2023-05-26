@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User
+from .models import User, Order, Transaction
 
 class TokenObtainPairSerializerWithoutPassword(TokenObtainPairSerializer):
 
@@ -66,3 +66,36 @@ class SendSMSRequestSerializer(serializers.Serializer):
 class VerifySMSRequestSerializer(serializers.Serializer):
     otp_code = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=True)
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = "__all__"
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = "__all__"
+
+    
+
+class TransactionCreateSerializer(serializers.Serializer):
+    pg_card_name = serializers.CharField(required=False, read_only=True)
+    order_id = serializers.CharField(required=True)
+    pg_description = serializers.CharField(required=False, default="Order Transaction")
+    pg_card_name = serializers.CharField(required=True)
+    pg_card_pan = serializers.CharField(required=True)
+    pg_card_cvc = serializers.CharField(required=True)
+    pg_card_month = serializers.CharField(required=True)
+    pg_card_year = serializers.CharField(required=True)
+    pg_auto_clearing = serializers.CharField(required=False, default="1")
+    pg_testing_mode = serializers.CharField(required=False, default="1")
+    pg_result_url = serializers.CharField(required=False, default="projetto.dev.factory.kz")
+    pg_3ds_challenge = serializers.CharField(required=False, default="1")
+    pg_param1 = serializers.CharField(required=False)
+    pg_param2 = serializers.CharField(required=False)
+    pg_param3 = serializers.CharField(required=False)
+
+    class Meta:
+        model = Transaction
+        fields = "__all__"

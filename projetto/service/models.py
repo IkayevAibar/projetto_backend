@@ -25,9 +25,8 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     flat_layout = models.ForeignKey("residence.Layout", on_delete=models.CASCADE)
-    doc = models.models.FileField("Договор", upload_to='doc/')
+    doc = models.FileField("Договор", upload_to='doc/',null=True, blank=True)
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='created')
-    price = models.IntegerField("Цена", default=0)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
 
@@ -39,9 +38,24 @@ class Order(models.Model):
         verbose_name_plural = "Заказы"
 
 class Transaction(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    script_name = models.CharField(max_length=200, blank=True, null=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.CharField(max_length=20)
-    transaction_id = models.CharField(max_length=100, unique=True)
+    description = models.TextField("Описание", blank=True, null=True)
+
+    pg_payment_id = models.CharField(max_length=200, blank=True, null=True)
+    pg_3ds = models.CharField(max_length=200, blank=True, null=True)
+    pg_3d_acsurl = models.CharField(max_length=200, blank=True, null=True)
+    pg_3d_md = models.CharField(max_length=200, blank=True, null=True)
+    pg_3d_pareq = models.CharField(max_length=200, blank=True, null=True)
+    pg_recurring_profile = models.CharField(max_length=200, blank=True, null=True)
+    pg_card_id = models.CharField(max_length=200, blank=True, null=True)
+    pg_card_token = models.CharField(max_length=200, blank=True, null=True)
+    pg_auth_code = models.CharField(max_length=200, blank=True, null=True)
+    pg_salt = models.CharField(max_length=200, blank=True, null=True)
+    pg_sig = models.CharField(max_length=200, blank=True, null=True)
+    pg_datetime = models.CharField(max_length=200, blank=True, null=True)
+
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
 

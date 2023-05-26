@@ -18,3 +18,5 @@ projetto/db.sqlite3
 
 twilio_test.py
 freedom_test.py
+
+.vscode/

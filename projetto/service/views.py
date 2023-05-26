@@ -1,3 +1,11 @@
+import hashlib
+import requests
+import random
+import string
+import urllib.parse
+import json
+import xmltodict
+
 from django.shortcuts import render
 
 from rest_framework import viewsets, permissions, status
@@ -17,9 +25,10 @@ from drf_yasg.utils import swagger_auto_schema
 
 
 from .permissions import IsAuthenticatedOrAdminOrReadOnly
-from .models import User
-from .serializers import UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, TokenObtainPairSerializerWithoutPassword
-from app.settings import account_sid, auth_token, verify_sid
+from .models import User, Order, Transaction
+from .serializers import UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, \
+                            TokenObtainPairSerializerWithoutPassword, TransactionSerializer, OrderSerializer, TransactionCreateSerializer
+from app.settings import account_sid, auth_token, verify_sid, payment_get, payment_give
 
 class TokenObtainPairWithoutPasswordView(TokenViewBase):
     serializer_class = TokenObtainPairSerializerWithoutPassword
@@ -149,3 +158,150 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': verification.status})
 
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    http_method_names = ['get', 'post', 'put', 'patch']
+
+class TransactionViewSet(viewsets.ModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    http_method_names = ['get', 'post']
+    permission_classes = [AllowAny]
+
+    # напиши get_serializer_class   
+    def get_serializer_class(self):
+        if self.action == 'payment':
+            return TransactionCreateSerializer
+        return TransactionSerializer
+    
+    @staticmethod
+    def generate_salt(length):
+        letters_and_digits = string.ascii_letters + string.digits
+        return ''.join(random.choice(letters_and_digits) for i in range(length))
+
+    @staticmethod
+    def generate_signature(params, salt):
+        pass
+        # напиши генерацию сигнатуры docs.paybox.money
+
+    @swagger_auto_schema(
+        request_body=TransactionCreateSerializer
+    )
+    @action(detail=False, methods=['post'])
+    def payment(self, request):
+        url = "https://api.paybox.money/g2g/payment"
+        script_name = urllib.parse.urlparse(url).path.split('/')[-1]
+        
+        order_id = int(request.data.get('order_id'))
+
+        order: Order = Order.objects.get(pk=order_id)
+
+        pg_amount = order.flat_layout.price
+        pg_currency = 'KZT'
+        pg_description = f'Order #{order.id}'
+
+        pg_merchant_id = '548856'
+        pg_card_name = request.data.get('pg_card_name')#'TEST TESTOV'
+        pg_card_pan = request.data.get('pg_card_pan')#'4563960122001999'
+        pg_card_cvc = request.data.get('pg_card_cvc')#'123'
+        pg_card_month = request.data.get('pg_card_month')#'12'
+        pg_card_year = request.data.get('pg_card_year')#'24'
+
+        pg_auto_clearing = request.data.get('pg_auto_clearing')#'1'
+        pg_testing_mode = request.data.get('pg_testing_mode')#'1'
+        pg_result_url = request.data.get('pg_result_url')#'projetto.dev.factory.kz'
+        pg_3ds_challenge = request.data.get('pg_3ds_challenge')#'0'
+        pg_param1 = request.data.get('pg_param1')#''
+        pg_param2 = request.data.get('pg_param2')#''
+        pg_param3 = request.data.get('pg_param3')#''
+        pg_order_id = order_id # Уникальный идентификатор заказа для каждого запроса
+
+        pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
+
+        # pg_sig = self.generate_signature(pg_merchant_id, pg_amount, pg_currency, pg_salt)
+
+        secret_key = payment_get
+
+        data = {
+            'pg_amount': pg_amount,
+            'pg_currency': pg_currency,
+            'pg_description': pg_description,
+            'pg_merchant_id': pg_merchant_id,
+            'pg_order_id': pg_order_id,
+            'pg_card_name': pg_card_name,
+            'pg_card_pan': pg_card_pan,
+            'pg_card_cvc': pg_card_cvc,
+            'pg_card_month': pg_card_month,
+            'pg_card_year': pg_card_year,
+            'pg_auto_clearing': pg_auto_clearing,
+            'pg_testing_mode': pg_testing_mode,
+            'pg_result_url': pg_result_url,
+            'pg_3ds_challenge': pg_3ds_challenge,
+            'pg_param1': pg_param1,
+            'pg_param2': pg_param2,
+            'pg_param3': pg_param3,
+            'pg_salt': pg_salt
+        }
+
+        sorted_data = sorted(data.items(), key=lambda x: x[0])
+
+        # Формирование строки для подписи
+        data_string = ';'.join([f"{value}" for key, value in sorted_data])
+
+        # Формирование строки для подписи с добавлением секретного ключа
+        data_with_secret_key = f"{script_name};{data_string};{secret_key}"
+        data_with_secret_key_encoded = data_with_secret_key.encode('latin-1')
+
+        md5_hash = hashlib.md5(data_with_secret_key_encoded)
+        pg_sig = md5_hash.hexdigest()
+
+        payload = {**data, 'pg_sig': pg_sig}
+
+        try:
+            response = requests.post(url, data=payload)
+            # if response.status_code != 200:
+            #     return Response(response.text, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                xml_dict = xmltodict.parse(response.text)
+                response_data = xml_dict['response']
+                print(response_data)
+            except xmltodict.ExpatError as e:
+                # Обработка ошибки ExpatError
+                return Response({'error': str(e)})
+
+            if response_data['pg_status'] != 'ok':
+                responce_status = status.HTTP_400_BAD_REQUEST
+
+                transaction = Transaction.objects.create(
+                    script_name=script_name,
+                    order=order,
+                    status=response_data['pg_status'],
+                    description=response_data['pg_error_description'])
+            else:
+                responce_status = status.HTTP_200_OK
+
+                transaction = Transaction.objects.create(
+                    script_name=script_name,
+                    order=order,
+                    status=response_data['pg_status'],
+                    description=response_data['pg_description'],
+                    pg_payment_id=response_data['pg_payment_id'],
+                    pg_3ds=response_data['pg_3ds'],
+                    pg_3d_acsurl=response_data['pg_3d_acsurl'],
+                    pg_3d_md=response_data['pg_3d_md'],
+                    pg_3d_pareq=response_data['pg_3d_pareq'],
+                    pg_recurring_profile=response_data['pg_recurring_profile'],
+                    pg_card_id=response_data['pg_card_id'],
+                    pg_card_token=response_data['pg_card_token'],
+                    pg_auth_code=response_data['pg_auth_code'],
+                    pg_salt=response_data['pg_salt'],
+                    pg_sig=response_data['pg_sig'],
+                    pg_datetime=response_data['pg_datetime']
+                    )
+               
+            return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
+
+        except requests.exceptions.RequestException as e:
+            # Обработка ошибки RequestException
+            return Response({'error': str(e)})
