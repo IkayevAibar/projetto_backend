@@ -77,17 +77,15 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = "__all__"
 
-    
-
-class TransactionCreateSerializer(serializers.Serializer):
-    pg_card_name = serializers.CharField(required=False, read_only=True)
-    order_id = serializers.CharField(required=True)
+class TransactionPaymentSerializer(serializers.Serializer):
+    pg_card_name = serializers.CharField(required=False)
+    order_id = serializers.CharField(required=False)
     pg_description = serializers.CharField(required=False, default="Order Transaction")
-    pg_card_name = serializers.CharField(required=True)
-    pg_card_pan = serializers.CharField(required=True)
-    pg_card_cvc = serializers.CharField(required=True)
-    pg_card_month = serializers.CharField(required=True)
-    pg_card_year = serializers.CharField(required=True)
+    pg_card_name = serializers.CharField(required=False)
+    pg_card_pan = serializers.CharField(required=False)
+    pg_card_cvc = serializers.CharField(required=False)
+    pg_card_month = serializers.CharField(required=False)
+    pg_card_year = serializers.CharField(required=False)
     pg_auto_clearing = serializers.CharField(required=False, default="1")
     pg_testing_mode = serializers.CharField(required=False, default="1")
     pg_result_url = serializers.CharField(required=False, default="projetto.dev.factory.kz")
@@ -95,7 +93,28 @@ class TransactionCreateSerializer(serializers.Serializer):
     pg_param1 = serializers.CharField(required=False)
     pg_param2 = serializers.CharField(required=False)
     pg_param3 = serializers.CharField(required=False)
+    pg_user_id = serializers.CharField(required=False)
+    pg_user_email = serializers.CharField(required=False)
+    pg_user_phone = serializers.CharField(required=False)
+    pg_user_ip = serializers.CharField(required=False)
+    pg_user_ip = serializers.CharField(required=False)
+    pg_md = serializers.CharField(required=False)
+    pg_pares = serializers.CharField(required=False)
+    pg_payment_id = serializers.CharField(required=False)
 
-    class Meta:
-        model = Transaction
-        fields = "__all__"
+
+class TransactionPaymentAcsSerializer(serializers.Serializer):
+    pg_md = serializers.CharField(required=False)
+    pg_pares = serializers.CharField(required=False)
+    pg_payment_id = serializers.CharField(required=False)
+
+class TransactionStatusSerializer(serializers.Serializer):
+    pg_payment_id = serializers.CharField(required=False)
+    pg_order_id = serializers.CharField(required=False)
+
+class TransactionCancelSerializer(serializers.Serializer):
+    pg_payment_id = serializers.CharField(required=False)
+
+class TransactionRefundSerializer(serializers.Serializer):
+    pg_payment_id = serializers.CharField(required=False)
+    pg_order_id = serializers.CharField(required=False)
