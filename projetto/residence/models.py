@@ -66,7 +66,7 @@ class Floor(Timestamp):
 
 
 class Apartment(Timestamp):
-    room_number = models.IntegerField("Номер квартиры", blank=True)
+    room_number = models.IntegerField("Количество комнат", blank=True)
     area = models.FloatField("Размер квартиры", blank=True)
     floor = models.ForeignKey(Floor, related_name='apartments', on_delete=models.CASCADE, blank=True)
 

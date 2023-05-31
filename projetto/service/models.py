@@ -1,6 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser,UserManager as BaseUserAdmin
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+
+from residence.models import Residence, Apartment
 from .managers import UserManager
+
+import os
+
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape, A3
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 # Create your models here.
 class User(AbstractUser):
@@ -25,10 +38,68 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, verbose_name="ID Клиента", on_delete=models.CASCADE)
     flat_layout = models.ForeignKey("residence.Layout", verbose_name="ID Планировки", on_delete=models.CASCADE)
-    doc = models.FileField("Договор", upload_to='doc/',null=True, blank=True)
+    doc = models.FileField("Договор", upload_to='docs/',null=True, blank=True)
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='created')
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
+
+    @staticmethod
+    def draw(can, text, x, y, font_size, type="static"):
+        can.setFont('ArialUnicode', font_size)
+        text_width = can.stringWidth(text, 'ArialUnicode', font_size)
+        text_height = font_size
+        y = y 
+        if type == "dynamic":
+            x = x
+            can.drawCentredString(x, y, text)
+        else:
+            x = x - text_width
+            can.drawString(x, y, text)
+
+    def generate_doc(self):
+        residence:Residence = self.flat_layout.apartment.floor.cluster.residence_id
+        apartment: Apartment = self.flat_layout.apartment
+
+        match apartment.room_number:
+            case 1: room_count = "Однокомнатная квартира"
+            case 2: room_count = "Двухкомнатная квартира"
+            case 3: room_count = "Трёхкомнатная квартира"
+            case 4: room_count = "Четырёхкомнатная квартира"
+            case _: room_count = apartment.room_number + "-комнатная квартира"
+
+        pdfmetrics.registerFont(TTFont('ArialUnicode', 'arial_unicode.ttf'))
+
+        packet = io.BytesIO()
+
+        can = canvas.Canvas(packet, pagesize=A3)
+        can.rotate(90)
+
+        self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
+        self.draw(can, residence.title, 600, -525, 38, "dynamic")
+        self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
+        self.draw(can, 'Владелец проекта:', 1100, -700, 24)
+        self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
+        self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
+        can.save()
+
+        packet.seek(0)
+
+        new_pdf = PdfFileReader(packet)
+        existing_pdf = PdfFileReader(open("utils/project_free.pdf", "rb"))
+        output = PdfFileWriter()
+
+        page = existing_pdf.pages[0]
+        page.merge_page(new_pdf.pages[0])
+        output.add_page(page)
+
+        file_name = residence.title + ".pdf"
+        file_path = os.path.join('docs', file_name)
+
+        with default_storage.open(file_path, "wb") as file:
+            output.write(file)
+
+        self.doc.name = file_path
+        self.save()
 
     def __str__(self):
         return f"Заказ #{self.pk}"

@@ -15,8 +15,12 @@ projetto/db.sqlite3
 *.pyc
 *.log
 *.pot
+*.cpython-311.pyc
+*.cpython-38.pyc
 
 twilio_test.py
 freedom_test.py
+test.py
+pdf_utility.py
 
 .vscode/

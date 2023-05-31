@@ -164,6 +164,26 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     http_method_names = ['get', 'post', 'put', 'patch']
 
+    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+    def generate_pdf(self, request, pk=None):
+        if(pk == None):
+            return Response({'message': "order id is required"})
+        
+        try:
+            int(pk)
+        except:
+            return Response({'message': "order id must be a number"})
+        
+        order = self.queryset.get(pk=pk)
+        
+        try:
+            order.generate_doc()
+        except:
+            return Response({'message': "pdf was not generated"})
+        
+        return Response({'message': "pdf was generated"})
+
+
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
