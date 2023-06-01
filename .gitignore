@@ -9,6 +9,7 @@ projetto/**/__pycache__
 projetto/media/**
 projetto/static/**
 projetto/db.sqlite3
+projetto/logs/**
 
 .env
 
