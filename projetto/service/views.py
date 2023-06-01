@@ -184,7 +184,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 'message': "pdf was generated",
-                'url': order.doc.url,
+                'url': order.doc.url or None,
             })
 
 
