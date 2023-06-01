@@ -181,7 +181,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         except:
             return Response({'message': "pdf was not generated"})
         
-        return Response({'message': "pdf was generated"})
+        return Response(
+            {
+                'message': "pdf was generated",
+                'url': order.doc.url,
+            })
 
 
 class TransactionViewSet(viewsets.ModelViewSet):

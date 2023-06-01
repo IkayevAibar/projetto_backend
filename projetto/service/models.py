@@ -44,7 +44,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
 
     @staticmethod
-    def draw(can, text, x, y, font_size, type="static"):
+    async def draw(can, text, x, y, font_size, type="static"):
         can.setFont('ArialUnicode', font_size)
         text_width = can.stringWidth(text, 'ArialUnicode', font_size)
         text_height = font_size
@@ -56,7 +56,7 @@ class Order(models.Model):
             x = x - text_width
             can.drawString(x, y, text)
 
-    def generate_doc(self):
+    async def generate_doc(self):
         residence:Residence = self.flat_layout.apartment.floor.cluster.residence_id
         apartment: Apartment = self.flat_layout.apartment
 
@@ -74,12 +74,12 @@ class Order(models.Model):
         can = canvas.Canvas(packet, pagesize=A3)
         can.rotate(90)
 
-        self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
-        self.draw(can, residence.title, 600, -525, 38, "dynamic")
-        self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
-        self.draw(can, 'Владелец проекта:', 1100, -700, 24)
-        self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
-        self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
+        await self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
+        await self.draw(can, residence.title, 600, -525, 38, "dynamic")
+        await self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
+        await self.draw(can, 'Владелец проекта:', 1100, -700, 24)
+        await self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
+        await self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
         can.save()
 
         packet.seek(0)
