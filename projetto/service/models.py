@@ -15,7 +15,6 @@ from reportlab.lib.pagesizes import letter, landscape, A3
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-# Create your models here.
 class User(AbstractUser):
     email = None 
     REQUIRED_FIELDS = []
@@ -44,7 +43,8 @@ class Order(models.Model):
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
 
     @staticmethod
-    async def draw(can, text, x, y, font_size, type="static"):
+    def draw(can, text, x, y, font_size, type="static"):
+        print(text + " is drawing...")
         can.setFont('ArialUnicode', font_size)
         text_width = can.stringWidth(text, 'ArialUnicode', font_size)
         text_height = font_size
@@ -56,7 +56,8 @@ class Order(models.Model):
             x = x - text_width
             can.drawString(x, y, text)
 
-    async def generate_doc(self):
+    
+    def generate_doc(self):
         residence:Residence = self.flat_layout.apartment.floor.cluster.residence_id
         apartment: Apartment = self.flat_layout.apartment
 
@@ -67,25 +68,26 @@ class Order(models.Model):
             case 4: room_count = "Четырёхкомнатная квартира"
             case _: room_count = apartment.room_number + "-комнатная квартира"
 
-        pdfmetrics.registerFont(TTFont('ArialUnicode', 'arial_unicode.ttf'))
+        pdfmetrics.registerFont(TTFont('ArialUnicode', './utils/arial_unicode.ttf'))
 
         packet = io.BytesIO()
 
         can = canvas.Canvas(packet, pagesize=A3)
         can.rotate(90)
 
-        await self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
-        await self.draw(can, residence.title, 600, -525, 38, "dynamic")
-        await self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
-        await self.draw(can, 'Владелец проекта:', 1100, -700, 24)
-        await self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
-        await self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
+        self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
+        self.draw(can, residence.title, 600, -525, 38, "dynamic")
+        self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
+        self.draw(can, 'Владелец проекта:', 1100, -700, 24)
+        self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
+        self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
+        
         can.save()
 
         packet.seek(0)
 
         new_pdf = PdfFileReader(packet)
-        existing_pdf = PdfFileReader(open("utils/project_free.pdf", "rb"))
+        existing_pdf = PdfFileReader(open("./utils/project_free.pdf", "rb"))
         output = PdfFileWriter()
 
         page = existing_pdf.pages[0]
@@ -100,6 +102,8 @@ class Order(models.Model):
 
         self.doc.name = file_path
         self.save()
+
+        return self.doc.url
 
     def __str__(self):
         return f"Заказ #{self.pk}"

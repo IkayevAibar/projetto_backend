@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Attachment, Cluster, Floor, Layout, Residence, Apartment
+from .models import Attachment, Cluster, Floor, Layout, Residence, Apartment, City
 # from service.models import User
 
 # Register your models here.
@@ -9,3 +9,4 @@ admin.site.register(Floor)
 admin.site.register(Layout)
 admin.site.register(Residence)
 admin.site.register(Apartment)
+admin.site.register(City)

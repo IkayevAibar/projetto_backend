@@ -2,21 +2,37 @@ version: "3.9"
 
 services:
   db:
-      image: postgres:latest
-      restart: always
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: zxczxc123
-        POSTGRES_DB: projetto_db
-      ports:
-        - "5432:5432"
-      volumes:
-        - ./data:/var/lib/postgresql/data
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: zxczxc123
+      POSTGRES_DB: projetto_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
   web:
     build: .
     ports:
-      - "8000:8000"
+      - "8080:8080"
     volumes:
       - "./projetto/:/projetto:rw"
-    
-    
+    depends_on:
+      - redis
+      - db
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A app worker --loglevel=info
+    volumes:
+      - "./projetto/:/projetto:rw"
+    depends_on:
+      - web
+      - redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+

@@ -5,8 +5,13 @@ import string
 import urllib.parse
 import json
 import xmltodict
+import asyncio
 
 from django.shortcuts import render
+from django.http import HttpResponse
+
+from asgiref.sync import sync_to_async
+from celery.result import AsyncResult
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
@@ -23,7 +28,7 @@ from twilio.base.exceptions import TwilioRestException
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-
+from .tasks import start_task
 from .permissions import IsAuthenticatedOrAdminOrReadOnly
 from .models import User, Order, Transaction
 from .serializers import UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, \
@@ -166,27 +171,39 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def generate_pdf(self, request, pk=None):
-        if(pk == None):
+        if pk is None:
             return Response({'message': "order id is required"})
-        
+
         try:
             int(pk)
         except:
             return Response({'message': "order id must be a number"})
-        
-        order = self.queryset.get(pk=pk)
-        
-        try:
-            order.generate_doc()
-        except:
-            return Response({'message': "pdf was not generated"})
-        
-        return Response(
-            {
-                'message': "pdf was generated",
-                # 'url': order.doc.url or None,
-            })
 
+        order = self.queryset.get(pk=pk)
+
+        result = start_task.delay(order.id)
+        
+        return Response({
+            'message': "pdf is generating",
+            'task_id': result.id
+            })
+    
+    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+    def check_pdf_status(self, request, pk=None):
+        task_id = request.query_params.get('task_id')
+
+        if task_id is None:
+            return Response({'message': "task_id is required"})
+
+
+        task = AsyncResult(task_id)
+        if task.state == 'SUCCESS':
+            return Response({'message': "pdf is ready", 'url': task.result})
+        elif task.state == 'FAILURE':
+            return Response({'message': "pdf generating is failed"})
+        else:
+            return Response({'message': "pdf is generating"})
+    
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()

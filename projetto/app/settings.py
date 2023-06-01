@@ -225,3 +225,9 @@ verify_sid = os.getenv('SMS_VER_SID')
 payment_get = os.getenv('PAYMENT_GET')
 payment_give = os.getenv('PAYMENT_GIVE')
 
+redis_host = os.getenv('REDIS_HOST')
+redis_port = os.getenv('REDIS_PORT')
+redis_db = os.getenv('REDIS_DB')
+
+CELERY_BROKER_URL = f'redis://{redis_host}:{redis_port}/{redis_db}'
+CELERY_RESULT_BACKEND = f'redis://{redis_host}:{redis_port}/{redis_db}'
