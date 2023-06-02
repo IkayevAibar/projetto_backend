@@ -336,10 +336,10 @@ class TransactionViewSet(viewsets.ModelViewSet):
                     status=response_data['pg_status'],
                     description=response_data['pg_error_description'],
                     pg_error_code=response_data['pg_error_code'],
-                    pg_user_id=response_data['pg_user_id'],
-                    pg_user_email=response_data['pg_user_email'],
-                    pg_user_phone=response_data['pg_user_phone'],
-                    pg_user_ip=response_data['pg_user_ip'],
+                    pg_user_id=pg_user_id,
+                    pg_user_email=pg_user_email,
+                    pg_user_phone=pg_user_phone,
+                    pg_user_ip=pg_user_ip,
                     
                     )
             else:
