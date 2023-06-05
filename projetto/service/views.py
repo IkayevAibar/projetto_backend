@@ -187,7 +187,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response({
             'message': "pdf is generating",
             'task_id': result.id,
-            'check_task_id': f'http://projetto.dev.thefactory.kz/orders/{order.id}/check_pdf_status/?task_id={result.id}'
+            'check_pdf_status': f'http://projetto.dev.thefactory.kz/orders/{order.id}/check_pdf_status/?task_id={result.id}'
             })
     
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
