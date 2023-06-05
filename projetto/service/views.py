@@ -164,6 +164,18 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status':e.code})
         
         return Response({'status': verification.status})
+    
+    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+    def get_all_orders(self, request, pk=None):
+        status = request.query_params.get('status')
+        
+        orders = Order.objects.filter(user=pk) #, status='paid')
+
+        if status is not None:
+            orders = orders.filter(status=status)
+
+        serializer = OrderSerializer(orders, many=True)
+        return Response({'orders': serializer.data})
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
