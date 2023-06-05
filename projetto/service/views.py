@@ -178,7 +178,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
         serializer = OrderSerializer(orders, many=True)
         return Response({'orders': serializer.data})
-    
     @swagger_auto_schema(
         request_body=ChangePasswordSerializer,
         operation_description='Восстановление пароля'
@@ -208,7 +207,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status': 'success'})
         else:
             return Response({'status': 'error'})
-
+    
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
