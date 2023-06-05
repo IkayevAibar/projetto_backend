@@ -220,13 +220,14 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get','post']
     permission_classes = [AllowAny]
 
-    def save_transaction_responce(self, order, payload, script_name):
+    def save_transaction_responce(self, order, payload, script_name, transaction_id):
         try:
             
                         
             transactionResponce = TransactionResponce.objects.create(
                 script_name=script_name,
                 order=order,
+                transaction_id=transaction_id,
                 #payment
                 pg_status=payload.get('pg_status'),
                 pg_description=payload.get('pg_description'),
@@ -351,7 +352,7 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
 
             
             
-            transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name)
+            transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
             transaction.save()
             
                

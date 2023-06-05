@@ -123,7 +123,8 @@ class Order(models.Model):
 class TransactionResponce(Timestamp):
     script_name = models.CharField("Имя вызываемого скрипта (от последнего / до конца или ?)", max_length=200, blank=True, null=True)
     order = models.ForeignKey(Order, verbose_name="Заказ", on_delete=models.CASCADE, null=True, blank=True)
-
+    transaction_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
+    
     #payment
     pg_status = models.CharField("Статус запроса", max_length=20) # ok, error
     pg_description = models.CharField("Описание статуса", max_length=200, blank=True, null=True)
