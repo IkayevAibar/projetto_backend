@@ -319,12 +319,12 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
 
         # del transaction_data['pg_sig']
         print(transaction_data)
-        return Response({'responce' : transaction_data})
+        
         pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
         
         
         transaction_data['pg_sig'] = pg_sig
-        
+        return Response({'responce' : transaction_data})
         transaction_payment = TransactionPayment.objects.create(**transaction_data)
         transaction_payment.save()
         
