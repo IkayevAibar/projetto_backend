@@ -1,10 +1,12 @@
 import re
 
+from collections import OrderedDict
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, Order, Transaction
+from .models import User, Order, TransactionResponce, TransactionPayment, TransactionStatus, TransactionCancel, TransactionRevoke
 
 class TokenObtainPairSerializerWithoutPassword(TokenObtainPairSerializer):
 
@@ -72,49 +74,38 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = "__all__"
 
-class TransactionSerializer(serializers.ModelSerializer):
+# class TransactionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Transaction
+#         fields = "__all__"
+
+class TransactionResponceSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        result = super(TransactionResponceSerializer, self).to_representation(instance)
+        return OrderedDict([(key, result[key]) for key in result if result[key] is not None])
     class Meta:
-        model = Transaction
+        model = TransactionResponce
         fields = "__all__"
 
-class TransactionPaymentSerializer(serializers.Serializer):
-    pg_card_name = serializers.CharField(required=False)
-    order_id = serializers.CharField(required=False)
-    pg_description = serializers.CharField(required=False, default="Order Transaction")
-    pg_card_name = serializers.CharField(required=False)
-    pg_card_pan = serializers.CharField(required=False)
-    pg_card_cvc = serializers.CharField(required=False)
-    pg_card_month = serializers.CharField(required=False)
-    pg_card_year = serializers.CharField(required=False)
-    pg_auto_clearing = serializers.CharField(required=False, default="1")
-    pg_testing_mode = serializers.CharField(required=False, default="1")
-    pg_result_url = serializers.CharField(required=False, default="projetto.dev.factory.kz")
-    pg_3ds_challenge = serializers.CharField(required=False, default="1")
-    pg_param1 = serializers.CharField(required=False)
-    pg_param2 = serializers.CharField(required=False)
-    pg_param3 = serializers.CharField(required=False)
-    pg_user_id = serializers.CharField(required=False)
-    pg_user_email = serializers.CharField(required=False)
-    pg_user_phone = serializers.CharField(required=False)
-    pg_user_ip = serializers.CharField(required=False)
-    pg_user_ip = serializers.CharField(required=False)
-    pg_md = serializers.CharField(required=False)
-    pg_pares = serializers.CharField(required=False)
-    pg_payment_id = serializers.CharField(required=False)
 
+class TransactionPaymentSerializer(serializers.ModelSerializer):
+    pg_salt = serializers.CharField(required=False, read_only=True)
+    pg_sig = serializers.CharField(required=False, read_only=True)
+    class Meta:
+        model = TransactionPayment
+        fields = "__all__"
 
-class TransactionPaymentAcsSerializer(serializers.Serializer):
-    pg_md = serializers.CharField(required=False)
-    pg_pares = serializers.CharField(required=False)
-    pg_payment_id = serializers.CharField(required=False)
+class TransactionStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionStatus
+        fields = "__all__"
 
-class TransactionStatusSerializer(serializers.Serializer):
-    pg_payment_id = serializers.CharField(required=False)
-    pg_order_id = serializers.CharField(required=False)
+class TransactionCancelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionCancel
+        fields = "__all__"
 
-class TransactionCancelSerializer(serializers.Serializer):
-    pg_payment_id = serializers.CharField(required=False)
-
-class TransactionRefundSerializer(serializers.Serializer):
-    pg_payment_id = serializers.CharField(required=False)
-    pg_order_id = serializers.CharField(required=False)
+class TransactionRevokeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionRevoke
+        fields = "__all__"
