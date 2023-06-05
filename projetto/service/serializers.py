@@ -69,6 +69,11 @@ class VerifySMSRequestSerializer(serializers.Serializer):
     otp_code = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=True)
 
+class ChangePasswordSerializer(serializers.Serializer):
+    otp_code = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order

@@ -31,7 +31,7 @@ from drf_yasg.utils import swagger_auto_schema
 from .tasks import start_task
 from .permissions import IsAuthenticatedOrAdminOrReadOnly
 from .models import User, Order, TransactionResponce, TransactionPayment, TransactionStatus, TransactionCancel, TransactionRevoke
-from .serializers import  UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, \
+from .serializers import  ChangePasswordSerializer, UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, \
                             TokenObtainPairSerializerWithoutPassword, OrderSerializer, TransactionPaymentSerializer, \
                             TransactionStatusSerializer, TransactionCancelSerializer, TransactionRevokeSerializer, \
                             TransactionResponceSerializer
@@ -53,6 +53,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return SendSMSRequestSerializer
         elif self.action in 'verify_sms':
             return VerifySMSRequestSerializer
+        elif self.action in 'restore_password':
+            return ChangePasswordSerializer
         
         # Возврат базового сериализатора по умолчанию
         return UserSerializer
@@ -168,7 +170,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def get_all_orders(self, request, pk=None):
         status = request.query_params.get('status')
-        
+
         orders = Order.objects.filter(user=pk) #, status='paid')
 
         if status is not None:
@@ -176,6 +178,35 @@ class UserViewSet(viewsets.ModelViewSet):
 
         serializer = OrderSerializer(orders, many=True)
         return Response({'orders': serializer.data})
+    
+    @swagger_auto_schema(
+        request_body=ChangePasswordSerializer
+    )
+    @action(detail=True, methods=['post'], permission_classes = [AllowAny])
+    def restore_password(self, request, pk=None):
+        user = User.objects.get(id=pk)
+
+        verified_number = user.username
+        otp_code = request.data.get('otp_code')
+        client = Client(account_sid, auth_token)
+
+        try:
+            verification_check = client.verify.v2.services(verify_sid) \
+                .verification_checks \
+                .create(to=verified_number, code=otp_code)
+        except TwilioRestException as e:
+            return Response({'status':e.code})
+
+        if verification_check.status == 'approved':
+            password = request.data.get('password')
+            confirm_password = request.data.get('confirm_password')
+            if(password != confirm_password):
+                return Response({'status': 'passwords not match'})
+            user.set_password(password)
+            user.save()
+            return Response({'status': 'success'})
+        else:
+            return Response({'status': 'error'})
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
