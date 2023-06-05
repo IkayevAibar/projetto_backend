@@ -324,7 +324,7 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         
         
         transaction_data['pg_sig'] = pg_sig
-        return Response({'responce' : transaction_data})
+        return Response({'responce' : (script_name, transaction_data, secret_key)})
         transaction_payment = TransactionPayment.objects.create(**transaction_data)
         transaction_payment.save()
         
