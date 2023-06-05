@@ -180,7 +180,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'orders': serializer.data})
     
     @swagger_auto_schema(
-        request_body=ChangePasswordSerializer
+        request_body=ChangePasswordSerializer,
+        operation_description='Восстановление пароля'
     )
     @action(detail=True, methods=['post'], permission_classes = [AllowAny])
     def restore_password(self, request, pk=None):
