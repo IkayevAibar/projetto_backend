@@ -21,7 +21,6 @@ projetto/logs/**
 *.cpython-38.pyc
 
 twilio_test.py
-freedom_test.py
 test.py
 pdf_utility.py
 pdf_utility_async.py
