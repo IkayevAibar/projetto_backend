@@ -222,8 +222,6 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
 
     def save_transaction_responce(self, order, payload, script_name, transaction_id):
         try:
-            
-                        
             transactionResponce = TransactionResponce.objects.create(
                 script_name=script_name,
                 order=order,
@@ -316,25 +314,21 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
 
         transaction_data['pg_salt'] = pg_salt
-
         
-        # pg_sig = self.generate_signature(pg_merchant_id, pg_amount, pg_currency, pg_salt)
-
         secret_key = payment_get
 
         # del transaction_data['pg_sig']
-
+        print(transaction_data)
+        return Response({'responce' : transaction_data})
         pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
         
+        
         transaction_data['pg_sig'] = pg_sig
-
+        
         transaction_payment = TransactionPayment.objects.create(**transaction_data)
         transaction_payment.save()
         
-        print(transaction_data)
         payload = {**transaction_data, 'pg_sig': pg_sig}
-
-        
 
         try:
             response = requests.post(url, data=payload)
@@ -349,12 +343,9 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
                 responce_status = status.HTTP_400_BAD_REQUEST
             else:
                 responce_status = status.HTTP_200_OK
-
-            
             
             transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
             transaction.save()
-            
                
             return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
 
