@@ -168,6 +168,28 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'status': verification.status})
     
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+    def send_sms(self, request, pk=None):
+        if pk:
+            try:
+                user = User.objects.get(id=pk)
+            except User.DoesNotExist:
+                return Response({'status': 'Пользователь не найден'})
+        else:
+            return Response({'status': 'ID должен быть указан'})
+        
+        # Отправка SMS
+        verified_number = user.username
+        client = Client(account_sid, auth_token)
+        try:
+            verification = client.verify.v2.services(verify_sid) \
+                .verifications \
+                .create(to=verified_number, channel="sms", locale="ru")
+        except TwilioRestException as e:
+            return Response({'status':e.code})
+        
+        return Response({'status': verification.status})
+    
+    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def get_all_orders(self, request, pk=None):
         status = request.query_params.get('status')
 
