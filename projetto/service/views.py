@@ -220,6 +220,16 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
     http_method_names = ['get','post']
     permission_classes = [AllowAny]
 
+    def get_serializer_class(self):
+        if self.action == 'status':
+            return TransactionStatusSerializer
+        elif self.action == 'cancel':
+            return TransactionCancelSerializer
+        elif self.action == 'revoke':
+            return TransactionRevokeSerializer
+
+        return TransactionPaymentSerializer
+
     def save_transaction_responce(self, order, payload, script_name, transaction_id):
         try:
             transactionResponce = TransactionResponce.objects.create(
@@ -342,243 +352,214 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         except requests.exceptions.RequestException as e:
             return Response({'error': str(e)})
     
-    
-    
-    # @action(detail=False, methods=['post'])
-    # def status(self, request):
-    #     url = "https://api.paybox.money/g2g/status_v2"
+    @action(detail=False, methods=['post'])
+    def status(self, request):
+        url = "https://api.paybox.money/get_status.php"
 
-    #     script_name = urllib.parse.urlparse(url).path.split('/')[-1]
-    #     secret_key = payment_get
-    #     pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
-
-    #     order_id = request.data.get('pg_order_id')
-
-    #     if order_id:
-    #         try:
-    #             order = Order.objects.get(pk=int(order_id))
-    #         except (ValueError, Order.DoesNotExist):
-    #             return Response({'message':"Order not found"},status=status.HTTP_404_NOT_FOUND)
-    #     else:
-    #         order = None
+        script_name = urllib.parse.urlparse(url).path.split('/')[-1]
         
-    #     pg_payment_id = request.data.get('pg_payment_id')
-    #     pg_merchant_id = '548856'
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    #     data = {
-    #         'pg_payment_id': pg_payment_id,
-    #         'pg_merchant_id': pg_merchant_id,
-    #         'pg_salt': pg_salt,
-    #         'pg_order_id': order_id,
-    #     }
-
-    #     pg_sig = self.generate_signature(script_name, data, secret_key)
-
-    #     payload = {**data, 'pg_sig': pg_sig}
-
-    #     self.save_transaction_in(None, payload, script_name)
-
-    #     try:
-    #         response = requests.post(url, data=payload)
-    #         try:
-    #             xml_dict = xmltodict.parse(response.text)
-    #             response_data = xml_dict['response']
-    #             print(response_data)
-    #         except xmltodict.ExpatError as e:
-    #             # Обработка ошибки ExpatError
-    #             return Response({'error': str(e)})
-
-    #         if response_data['pg_status'] != 'ok':
-    #             responce_status = status.HTTP_400_BAD_REQUEST
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 order=order,
-    #                 pg_payment_id=pg_payment_id,
-    #                 status=response_data['pg_status'],
-    #                 description=response_data['pg_error_description'].encode('latin-1').decode('utf-8'),
-    #                 pg_error_code=response_data['pg_error_code']
-    #                 )
-    #         else:
-    #             responce_status = status.HTTP_200_OK
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 status=response_data['pg_status'],
-    #                 pg_payment_id=response_data['pg_payment_id'],
-    #                 pg_order_id=response_data['pg_order_id'],
-    #                 pg_currency=response_data['pg_currency'],
-    #                 pg_status=response_data['pg_status'],
-    #                 pg_payment_status=response_data['pg_payment_status'],
-    #                 pg_amount=response_data['pg_amount'],
-    #                 pg_net_amount=response_data['pg_net_amount'],
-    #                 pg_clearing_amount=response_data['pg_clearing_amount'],
-    #                 pg_refund_amount=response_data['pg_refund_amount'],
-    #                 pg_user_email=response_data['pg_user_email'],
-    #                 pg_card_name=response_data['pg_card_name'],
-    #                 pg_card_id=response_data['pg_card_id'],
-    #                 pg_card_token=response_data['pg_card_token'],
-    #                 pg_card_pan=response_data['pg_card_pan'],
-    #                 pg_card_exp=response_data['pg_card_exp'],
-    #                 pg_card_brand=response_data['pg_card_brand'],
-    #                 pg_user_phone=response_data['pg_user_phone'],
-    #                 pg_payment_date=response_data['pg_payment_date'],
-    #                 pg_captured=response_data['pg_captured'],
-    #                 pg_refund_payments=response_data['pg_refund_payments'],
-    #                 pg_revoked_payments=response_data['pg_revoked_payments'],
-    #                 pg_reference=response_data['pg_reference'],
-    #                 pg_intreference=response_data['pg_intreference'],
-    #                 pg_failure_code=response_data['pg_failure_code'],
-    #                 pg_failure_description=response_data['pg_failure_description'],
-    #                 pg_auth_code=response_data['pg_auth_code'],
-    #                 pg_salt=response_data['pg_salt'],
-    #                 pg_sig=response_data['pg_sig'],
-    #                 pg_datetime=response_data['pg_datetime']
-    #                 )
-               
-    #         return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
-
-    #     except requests.exceptions.RequestException as e:
-    #         # Обработка ошибки RequestException
-    #         return Response({'error': str(e)})
-
-    # @action(detail=False, methods=['post'])
-    # def cancel(self, request):
-    #     url = "https://api.paybox.money/g2g/cancel"
-
-    #     script_name = urllib.parse.urlparse(url).path.split('/')[-1]
-    #     secret_key = payment_get
-    #     pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
-
-    #     pg_payment_id = request.data.get('pg_payment_id')
-
-    #     pg_merchant_id = '548856'
-
-    #     data = {
-    #         'pg_payment_id': pg_payment_id,
-    #         'pg_merchant_id': pg_merchant_id,
-    #         'pg_salt': pg_salt,
-    #     }
-
-    #     pg_sig = self.generate_signature(script_name, data, secret_key)
-
-    #     payload = {**data, 'pg_sig': pg_sig}
-
-    #     self.save_transaction_in(None, payload, script_name)
-
-    #     try:
-    #         response = requests.post(url, data=payload)
-    #         try:
-    #             xml_dict = xmltodict.parse(response.text)
-    #             response_data = xml_dict['response']
-    #             print(response_data)
-    #         except xmltodict.ExpatError as e:
-    #             # Обработка ошибки ExpatError
-    #             return Response({'error': str(e)})
-
-    #         if response_data['pg_status'] != 'ok':
-    #             responce_status = status.HTTP_400_BAD_REQUEST
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 pg_payment_id=pg_payment_id,
-    #                 status=response_data['pg_status'],
-    #                 description=response_data['pg_error_description'],
-    #                 pg_error_code=response_data['pg_error_code']
-    #                 )
-    #         else:
-    #             responce_status = status.HTTP_200_OK
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 status=response_data['pg_status'],
-    #                 pg_payment_id=response_data['pg_payment_id'],
-    #                 pg_payment_revoke_id=response_data['pg_payment_revoke_id'],
-    #                 pg_status=response_data['pg_status'],
-    #                 pg_revoke_status=response_data['pg_revoke_status'],
-    #                 pg_salt=response_data['pg_salt'],
-    #                 pg_sig=response_data['pg_sig'],
-    #                 pg_datetime=response_data['pg_datetime']
-    #                 )
-               
-    #         return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
-
-    #     except requests.exceptions.RequestException as e:
-    #         # Обработка ошибки RequestException
-    #         return Response({'error': str(e)})
-    
-    # @action(detail=False, methods=['post'])
-    # def revoke(self, request):
-    #     url = "https://api.paybox.money/g2g/refund"
-
-    #     script_name = urllib.parse.urlparse(url).path.split('/')[-1]
-    #     secret_key = payment_get
-    #     pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
-
-    #     order_id = request.data.get('order_id')
-    #     pg_payment_id = request.data.get('pg_payment_id')
-    #     if order_id:
-    #         try:
-    #             order = Order.objects.get(pk=int(order_id))
-    #         except (ValueError, Order.DoesNotExist):
-    #             return Response({'message':"Order not found"},status=status.HTTP_404_NOT_FOUND)
-    #     else:
-    #         raise ValidationError("Order id is required")
+        transaction_data = serializer.validated_data
         
-    #     pg_merchant_id = '548856'
+        order_id = transaction_data.get('pg_order_id')
+        order = None
+        
+        if order_id:
+            try:
+                order = Order.objects.get(id=order_id)
+            except:
+                raise ValidationError('Заказ не найден')
 
-    #     data = {
-    #         'pg_payment_id': pg_payment_id,
-    #         'pg_merchant_id': pg_merchant_id,
-    #         'pg_amount': order.flat_layout.price,
-    #         'pg_currency': "KZT",
-    #         'pg_salt': pg_salt,
-    #     }
+        transaction_data['pg_merchant_id'] = '548856'
 
-    #     pg_sig = self.generate_signature(script_name, data, secret_key)
+        pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
 
-    #     payload = {**data, 'pg_sig': pg_sig}
+        transaction_data['pg_salt'] = pg_salt
+        
+        secret_key = payment_get
 
-    #     self.save_transaction_in(None, payload, script_name)
+        pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
+        
+        transaction_data['pg_sig'] = pg_sig
+        transaction_payment = TransactionStatus.objects.create(**transaction_data)
+        transaction_payment.save()
+        
+        payload = {**transaction_data, 'pg_sig': pg_sig}
 
-    #     try:
-    #         response = requests.post(url, data=payload)
-    #         try:
-    #             xml_dict = xmltodict.parse(response.text)
-    #             response_data = xml_dict['response']
-    #             print(response_data)
-    #         except xmltodict.ExpatError as e:
-    #             # Обработка ошибки ExpatError
-    #             return Response({'error': str(e)})
+        try:
+            response = requests.post(url, data=payload)
+            try:
+                xml_dict = xmltodict.parse(response.text)
+                response_data = xml_dict['response']
+            except xmltodict.ExpatError as e:
+                return Response({'error': str(e)})
 
-    #         if response_data['pg_status'] != 'ok':
-    #             responce_status = status.HTTP_400_BAD_REQUEST
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 pg_payment_id=pg_payment_id,
-    #                 status=response_data['pg_status'],
-    #                 description=response_data['pg_error_description'],
-    #                 pg_error_code=response_data['pg_error_code']
-    #                 )
-    #         else:
-    #             responce_status = status.HTTP_200_OK
-
-    #             transaction = Transaction.objects.create(
-    #                 script_name=script_name,
-    #                 status=response_data['pg_status'],
-    #                 pg_payment_id=response_data['pg_payment_id'],
-    #                 pg_payment_refund_id=response_data['pg_payment_refund_id'],
-    #                 pg_status=response_data['pg_status'],
-    #                 pg_refund_status=response_data['pg_refund_status'],
-    #                 pg_salt=response_data['pg_salt'],
-    #                 pg_sig=response_data['pg_sig'],
-    #                 pg_datetime=response_data['pg_datetime']
-    #                 )
+            if response_data['pg_status'] != 'ok':
+                responce_status = status.HTTP_400_BAD_REQUEST
+            else:
+                responce_status = status.HTTP_200_OK
+            
+            transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
+            transaction.save()
                
-    #         return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
+            return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
 
-    #     except requests.exceptions.RequestException as e:
-    #         # Обработка ошибки RequestException
-    #         return Response({'error': str(e)})
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)})
+    
+    @action(detail=False, methods=['post'])
+    def status(self, request):
+        url = "https://api.paybox.money/get_status.php"
 
+        script_name = urllib.parse.urlparse(url).path.split('/')[-1]
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        transaction_data = serializer.validated_data
+        
+        order_id = transaction_data.get('pg_order_id')
+        order = None
+        
+        if order_id:
+            try:
+                order = Order.objects.get(id=order_id)
+            except:
+                raise ValidationError('Заказ не найден')
+
+        transaction_data['pg_merchant_id'] = '548856'
+
+        pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
+
+        transaction_data['pg_salt'] = pg_salt
+        
+        secret_key = payment_get
+
+        pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
+        
+        transaction_data['pg_sig'] = pg_sig
+        transaction_payment = TransactionStatus.objects.create(**transaction_data)
+        transaction_payment.save()
+        
+        payload = {**transaction_data, 'pg_sig': pg_sig}
+
+        try:
+            response = requests.post(url, data=payload)
+            try:
+                xml_dict = xmltodict.parse(response.text)
+                response_data = xml_dict['response']
+            except xmltodict.ExpatError as e:
+                return Response({'error': str(e)})
+
+            if response_data['pg_status'] != 'ok':
+                responce_status = status.HTTP_400_BAD_REQUEST
+            else:
+                responce_status = status.HTTP_200_OK
+            
+            transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
+            transaction.save()
+               
+            return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
+
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)})
+    
+    @action(detail=False, methods=['post'])
+    def cancel(self, request):
+        url = "https://api.paybox.money/cancel.php"
+
+        script_name = urllib.parse.urlparse(url).path.split('/')[-1]
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        transaction_data = serializer.validated_data
+        
+        transaction_data['pg_merchant_id'] = '548856'
+
+        pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
+
+        transaction_data['pg_salt'] = pg_salt
+        
+        secret_key = payment_get
+
+        pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
+        
+        transaction_data['pg_sig'] = pg_sig
+        transaction_payment = TransactionCancel.objects.create(**transaction_data)
+        transaction_payment.save()
+        
+        payload = {**transaction_data, 'pg_sig': pg_sig}
+
+        try:
+            response = requests.post(url, data=payload)
+            try:
+                xml_dict = xmltodict.parse(response.text)
+                response_data = xml_dict['response']
+            except xmltodict.ExpatError as e:
+                return Response({'error': str(e)})
+
+            if response_data['pg_status'] != 'ok':
+                responce_status = status.HTTP_400_BAD_REQUEST
+            else:
+                responce_status = status.HTTP_200_OK
+            
+            transaction = self.save_transaction_responce(order=None, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
+            transaction.save()
+               
+            return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
+
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)})
+    
+    @action(detail=False, methods=['post'])
+    def revoke(self, request):
+        url = "https://api.paybox.money/revoke.php"
+
+        script_name = urllib.parse.urlparse(url).path.split('/')[-1]
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        transaction_data = serializer.validated_data
+        
+        transaction_data['pg_merchant_id'] = '548856'
+        transaction_data['pg_refund_amount'] = '0'
+
+        pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
+
+        transaction_data['pg_salt'] = pg_salt
+        
+        secret_key = payment_get
+
+        pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
+        
+        transaction_data['pg_sig'] = pg_sig
+        transaction_payment = TransactionRevoke.objects.create(**transaction_data)
+        transaction_payment.save()
+        
+        payload = {**transaction_data, 'pg_sig': pg_sig}
+
+        try:
+            response = requests.post(url, data=payload)
+            try:
+                xml_dict = xmltodict.parse(response.text)
+                response_data = xml_dict['response']
+            except xmltodict.ExpatError as e:
+                return Response({'error': str(e)})
+
+            if response_data['pg_status'] != 'ok':
+                responce_status = status.HTTP_400_BAD_REQUEST
+            else:
+                responce_status = status.HTTP_200_OK
+            
+            transaction = self.save_transaction_responce(order=None, payload=response_data, script_name=script_name, transaction_id=transaction_payment.id)
+            transaction.save()
+               
+            return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
+
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)})
+    
