@@ -167,21 +167,22 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': verification.status})
     
-    # @action(detail=True, methods=['get'], permission_classes = [AllowAny])
-    # def get_all_orders(self, request, pk=None):
-    #     status = request.query_params.get('status')
+    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+    def get_all_orders(self, request, pk=None):
+        status = request.query_params.get('status')
 
-    #     orders = Order.objects.filter(user=pk) #, status='paid')
+        orders = Order.objects.filter(user=pk) #, status='paid')
 
-    #     if status is not None:
-    #         orders = orders.filter(status=status)
+        if status is not None:
+            orders = orders.filter(status=status)
 
-    #     serializer = OrderSerializer(orders, many=True)
-    #     return Response({'orders': serializer.data})
-    # @swagger_auto_schema(
-    #     request_body=ChangePasswordSerializer,
-    #     operation_description='Восстановление пароля'
-    # )
+        serializer = OrderSerializer(orders, many=True)
+        return Response({'orders': serializer.data})
+    
+    @swagger_auto_schema(
+        request_body=ChangePasswordSerializer,
+        operation_description='Восстановление пароля'
+    )
     @action(detail=True, methods=['post'], permission_classes = [AllowAny])
     def restore_password(self, request, pk=None):
         user = User.objects.get(id=pk)
