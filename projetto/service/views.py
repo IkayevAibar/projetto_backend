@@ -291,9 +291,7 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-
         transaction_data = serializer.validated_data
-
         
         order_id = transaction_data.get('pg_order_id')
         order = None
@@ -309,22 +307,15 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         transaction_data['pg_currency'] = 'KZT'
         transaction_data['pg_testing_mode'] = '1'
 
-        # Создание нового объекта Transaction на основе валидированных данных
-        
         pg_salt = self.generate_salt(16)  # Уникальная случайная строка для каждого запроса
 
         transaction_data['pg_salt'] = pg_salt
         
         secret_key = payment_get
 
-        # del transaction_data['pg_sig']
-        print(transaction_data)
-        
         pg_sig = self.generate_signature(script_name, transaction_data, secret_key)
         
-        
         transaction_data['pg_sig'] = pg_sig
-        return Response({'responce' : (script_name, transaction_data, secret_key)})
         transaction_payment = TransactionPayment.objects.create(**transaction_data)
         transaction_payment.save()
         
@@ -336,7 +327,6 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
                 xml_dict = xmltodict.parse(response.text)
                 response_data = xml_dict['response']
             except xmltodict.ExpatError as e:
-                # Обработка ошибки ExpatError
                 return Response({'error': str(e)})
 
             if response_data['pg_status'] != 'ok':
@@ -350,7 +340,6 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
             return Response({'responce' : response_data, 'transaction': transaction.id}, status=responce_status)
 
         except requests.exceptions.RequestException as e:
-            # Обработка ошибки RequestException
             return Response({'error': str(e)})
     
     
