@@ -80,9 +80,11 @@ class OrderSerializer(serializers.ModelSerializer):
 #         fields = "__all__"
 
 class TransactionResponceSerializer(serializers.ModelSerializer):
+
     def to_representation(self, instance):
         result = super(TransactionResponceSerializer, self).to_representation(instance)
         return OrderedDict([(key, result[key]) for key in result if result[key] is not None])
+    
     class Meta:
         model = TransactionResponce
         fields = "__all__"
@@ -94,6 +96,7 @@ class TransactionPaymentSerializer(serializers.ModelSerializer):
     pg_merchant_id = serializers.CharField(required=False, read_only=True)
     pg_amount = serializers.CharField(required=False, read_only=True)
     pg_currency = serializers.CharField(required=False, read_only=True)
+
     class Meta:
         model = TransactionPayment
         fields = "__all__"

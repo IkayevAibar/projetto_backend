@@ -13,8 +13,8 @@ from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from service.views import UserViewSet, TokenObtainPairWithoutPasswordView, OrderViewSet, TransactionViewSet, \
-                            TransactionPaymentViewSet
+from service.views import UserViewSet, TokenObtainPairWithoutPasswordView, OrderViewSet, TransactionViewSet
+                            # TransactionPaymentViewSet
 from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, \
                             LayoutViewSet, CityViewSet, TicketAttachmentViewSet, TicketViewSet
 
@@ -22,7 +22,7 @@ router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'orders', OrderViewSet)
 router.register(r'transactions', TransactionViewSet)
-router.register(r'payments', TransactionPaymentViewSet)
+# router.register(r'payments', TransactionPaymentViewSet)
 router.register(r'residences', ResidenceViewSet)
 router.register(r'attachments', AttachmentViewSet)
 router.register(r'clusters', ClusterViewSet)
