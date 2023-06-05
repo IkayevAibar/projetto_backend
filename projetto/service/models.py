@@ -173,10 +173,10 @@ class TransactionResponce(Timestamp):
 
 class TransactionPayment(Timestamp):
     #required
-    pg_order_id = models.CharField("ID заказа", max_length=200, blank=True, null=True)
-    pg_merchant_id = models.CharField("ID магазина", max_length=200, blank=True, null=True)
-    pg_amount = models.CharField("Сумма платежа", max_length=200, blank=True, null=True)
-    pg_description = models.TextField("Описание", blank=True, null=True)
+    pg_order_id = models.CharField("ID заказа*", max_length=200, blank=True, null=True)
+    pg_merchant_id = models.CharField("ID магазина*", max_length=200, blank=True, null=True)
+    pg_amount = models.CharField("Сумма платежа*", max_length=200, blank=True, null=True)
+    pg_description = models.TextField("Описание*", blank=True, null=True)
     pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
     pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
     # not required

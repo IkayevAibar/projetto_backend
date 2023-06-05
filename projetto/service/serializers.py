@@ -91,6 +91,9 @@ class TransactionResponceSerializer(serializers.ModelSerializer):
 class TransactionPaymentSerializer(serializers.ModelSerializer):
     pg_salt = serializers.CharField(required=False, read_only=True)
     pg_sig = serializers.CharField(required=False, read_only=True)
+    pg_merchant_id = serializers.CharField(required=False, read_only=True)
+    pg_amount = serializers.CharField(required=False, read_only=True)
+    pg_currency = serializers.CharField(required=False, read_only=True)
     class Meta:
         model = TransactionPayment
         fields = "__all__"

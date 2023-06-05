@@ -292,9 +292,21 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+
         transaction_data = serializer.validated_data
-        print(transaction_data)
+
+        
+        order_id = transaction_data.get('pg_order_id')
+        order = None
+        
+        if order_id:
+            try:
+                order = Order.objects.get(id=order_id)
+            except:
+                raise ValidationError('Заказ не найден')
+
         transaction_data['pg_merchant_id'] = '548856'
+        transaction_data['pg_amount'] = order.flat_layout.price
         transaction_data['pg_currency'] = 'KZT'
         transaction_data['pg_testing_mode'] = '1'
 
@@ -337,11 +349,7 @@ class TransactionPaymentViewSet(viewsets.ModelViewSet):
             else:
                 responce_status = status.HTTP_200_OK
 
-            order_id = transaction_data.get('pg_order_id')
-            order = None
             
-            if order_id:
-                order = Order.objects.get(id=order_id)
             
             transaction = self.save_transaction_responce(order=order, payload=response_data, script_name=script_name)
             transaction.save()
