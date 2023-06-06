@@ -152,7 +152,7 @@ class UserViewSet(viewsets.ModelViewSet):
         operation_description='Send SMS verification code to your phone number'
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
-    def send_sms(self, request, pk=None):
+    def send_sms_to_phone(self, request, pk=None):
         # user = self.get_object()
         # Отправка SMS
         # ...
@@ -168,7 +168,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'status': verification.status})
     
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
-    def send_sms(self, request, pk=None):
+    def send_sms_to_id(self, request, pk=None):
         if pk:
             try:
                 user = User.objects.get(id=pk)
