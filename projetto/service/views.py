@@ -130,10 +130,6 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
     def verify_sms(self, request, pk=None):
-        # user = self.get_object()
-        # Получение SMS code
-        # ...
-        
         verified_number = request.data.get('phone_number')
         otp_code = request.data.get('otp_code')
         client = Client(account_sid, auth_token)
@@ -153,9 +149,6 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
     def send_sms_to_phone(self, request, pk=None):
-        # user = self.get_object()
-        # Отправка SMS
-        # ...
         verified_number = request.data.get('phone_number')
         client = Client(account_sid, auth_token)
         try:
@@ -168,7 +161,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'status': verification.status})
     
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
-    def send_sms_to_id(self, request, pk=None):
+    def send_sms(self, request, pk=None):
         if pk:
             try:
                 user = User.objects.get(id=pk)
