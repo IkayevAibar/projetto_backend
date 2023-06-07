@@ -87,9 +87,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def get_by_phone(self, request):
         phone = request.query_params.get('phone')
-
+        if phone:
+            phone = phone.replace(' ', '')
+            if not phone.startswith('+'):
+                phone = '+' + phone
         try:
-            user = User.objects.get(username=phone)
+            user = User.objects.get(username=str.replace(phone, ' ', '+'))
             serializer = self.get_serializer(user)
 
             if user.check_password(''):
@@ -142,7 +145,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status':e.code})
         
         return Response({'status': verification_check.status})
-    
+
     @swagger_auto_schema(
         request_body=SendSMSRequestSerializer,
         operation_description='Send SMS verification code to your phone number'
@@ -159,7 +162,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status':e.code})
         
         return Response({'status': verification.status})
-    
+
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def send_sms(self, request, pk=None):
         if pk:
@@ -181,7 +184,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status':e.code})
         
         return Response({'status': verification.status})
-    
+ 
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def get_all_orders(self, request, pk=None):
         status = request.query_params.get('status')
