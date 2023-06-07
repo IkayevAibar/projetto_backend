@@ -30,6 +30,12 @@ class TokenObtainPairSerializerWithoutPassword(TokenObtainPairSerializer):
         }
         return tokens
 
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'sms_verified', 'is_active', 'date_joined']
+
+
 class UserSerializer(serializers.ModelSerializer):
     empty_password = serializers.SerializerMethodField(read_only=True)
 

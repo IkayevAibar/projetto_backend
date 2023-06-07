@@ -34,7 +34,7 @@ from .models import User, Order, TransactionResponce, TransactionPayment, Transa
 from .serializers import  ChangePasswordSerializer, UserSerializer, UserCreateSerializer, SendSMSRequestSerializer, VerifySMSRequestSerializer, \
                             TokenObtainPairSerializerWithoutPassword, OrderSerializer, TransactionPaymentSerializer, \
                             TransactionStatusSerializer, TransactionCancelSerializer, TransactionRevokeSerializer, \
-                            TransactionResponceSerializer
+                            TransactionResponceSerializer, UserListSerializer
 from app.settings import account_sid, auth_token, verify_sid, payment_get, payment_give
 
 class TokenObtainPairWithoutPasswordView(TokenViewBase):
@@ -55,6 +55,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return VerifySMSRequestSerializer
         elif self.action in 'restore_password':
             return ChangePasswordSerializer
+        elif self.action in 'list':
+            return UserListSerializer
         
         # Возврат базового сериализатора по умолчанию
         return UserSerializer
