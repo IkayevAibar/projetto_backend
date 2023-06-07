@@ -91,18 +91,16 @@ class UserViewSet(viewsets.ModelViewSet):
             phone = phone.replace(' ', '')
             if not phone.startswith('+'):
                 phone = '+' + phone
+
         try:
-            user = User.objects.get(username=str.replace(phone, ' ', '+'))
-            serializer = self.get_serializer(user)
-
-            if user.check_password(''):
-                serializer.data['empty_password'] = True
-            else:
-                serializer.data['empty_password'] = False
-
-            return Response(serializer.data)
+            user = User.objects.get(username=phone)
         except User.DoesNotExist:
             return Response({'detail': 'Пользователя с таким номер нет'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(user)
+        # serializer.data['empty_password'] = user.check_password('')
+
+        return Response(serializer.data)
 
     def create(self, request):
         user_manager = User.objects

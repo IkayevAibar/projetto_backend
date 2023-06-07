@@ -31,9 +31,14 @@ class TokenObtainPairSerializerWithoutPassword(TokenObtainPairSerializer):
         return tokens
 
 class UserSerializer(serializers.ModelSerializer):
+    empty_password = serializers.SerializerMethodField(read_only=True)
+
+    def get_empty_password(self, obj):
+        return obj.check_password('')
+    
     class Meta:
         model = User
-        fields = ['id', 'username','first_name','sms_verified' , 'password','is_active' ,'date_joined']
+        fields = ['id', 'username', 'first_name', 'sms_verified', 'password', 'is_active', 'empty_password', 'date_joined']
         extra_kwargs = {'password': {'write_only': True}}
     
     def validate_username(self, value):
