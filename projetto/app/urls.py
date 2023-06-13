@@ -13,16 +13,18 @@ from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from service.views import UserViewSet, TokenObtainPairWithoutPasswordView, OrderViewSet, TransactionViewSet
-                            # TransactionPaymentViewSet
+from service.views.user_views import UserViewSet
+from service.views.order_views import OrderViewSet
+from service.views.transaction_views import TransactionViewSet
+from service.views.ticket_views import TicketViewSet, TicketAttachmentViewSet
+
 from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, \
-                            LayoutViewSet, CityViewSet, TicketAttachmentViewSet, TicketViewSet
+                            LayoutViewSet, CityViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'orders', OrderViewSet)
 router.register(r'transactions', TransactionViewSet)
-# router.register(r'payments', TransactionPaymentViewSet)
 router.register(r'residences', ResidenceViewSet)
 router.register(r'attachments', AttachmentViewSet)
 router.register(r'clusters', ClusterViewSet)
@@ -65,5 +67,5 @@ urlpatterns += [
 urlpatterns += [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/without-password/', TokenObtainPairWithoutPasswordView.as_view(), name='token_obtain_pair_without_password'),
+    # path('api/token/without-password/', TokenObtainPairWithoutPasswordView.as_view(), name='token_obtain_pair_without_password'),
 ]

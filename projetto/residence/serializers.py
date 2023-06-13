@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City, Ticket, TicketAttachment
+from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City
 from datetime import timezone
 class ResidenceSerializer(serializers.ModelSerializer):
     city_name = serializers.StringRelatedField(source='city.name')
@@ -66,22 +66,3 @@ class CitySerializer(serializers.ModelSerializer):
     
     def perform_update(self, serializer):
         serializer.save(updated_at=timezone.now())
-
-class TicketSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ticket
-        fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at')
-    
-    def perform_update(self, serializer):
-        serializer.save(updated_at=timezone.now())
-
-class TicketAttachmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TicketAttachment
-        fields = '__all__'
-        read_only_fields = ('created_at', 'updated_at')
-    
-    def perform_update(self, serializer):
-        serializer.save(updated_at=timezone.now())
-

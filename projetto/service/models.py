@@ -1,9 +1,11 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser,UserManager as BaseUserAdmin
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
+from django.utils import timezone
+from datetime import datetime
 
-from residence.models import Residence, Apartment
+from django.db import models
+from django.contrib.auth.models import AbstractUser,UserManager
+from django.core.files.storage import default_storage
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from residence.models import Residence, Apartment, Layout, Cluster, Floor
 from .managers import UserManager
 
 import os
@@ -11,7 +13,7 @@ import os
 from PyPDF2 import PdfFileWriter, PdfFileReader
 import io
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, landscape, A3
+from reportlab.lib.pagesizes import A3
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
@@ -23,10 +25,12 @@ class Timestamp(models.Model):
         abstract = True
 
 class User(AbstractUser):
+    first_name = None
+    last_name = None
     email = None 
-    REQUIRED_FIELDS = []
     sms_verified = models.BooleanField("SMS верифицирован", default= False)
-
+    full_name = models.CharField("Полное имя", max_length=150, blank=True)
+    
     objects = UserManager()
 
     def __str__(self):
@@ -44,6 +48,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, verbose_name="ID Клиента", on_delete=models.CASCADE)
     flat_layout = models.ForeignKey("residence.Layout", verbose_name="ID Планировки", on_delete=models.CASCADE)
+    apartment = models.ForeignKey("residence.Apartment", verbose_name="ID Квартиры", on_delete=models.CASCADE)
     doc = models.FileField("Договор", upload_to='docs/',null=True, blank=True)
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='created')
     created_at = models.DateTimeField("Создано", auto_now_add=True)
@@ -65,8 +70,12 @@ class Order(models.Model):
 
     
     def generate_doc(self):
-        residence:Residence = self.flat_layout.apartment.floor.cluster.residence_id
-        apartment: Apartment = self.flat_layout.apartment
+        residence:Residence = self.apartment.floor.cluster.residence_id
+        cluster:Cluster = self.apartment.floor.cluster
+        apartment: Apartment = self.apartment
+        layout: Layout = self.flat_layout
+
+        current_year = datetime.now(tz=timezone.get_current_timezone()).year
 
         match apartment.room_number:
             case 1: room_count = "Однокомнатная квартира"
@@ -84,10 +93,10 @@ class Order(models.Model):
 
         self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
         self.draw(can, residence.title, 600, -525, 38, "dynamic")
-        self.draw(can, room_count + ": " + "RT/01/08/1.1/def" , 600, -575, 28, "dynamic")
+        self.draw(can, room_count + ": " + f"{residence.slug}/{cluster.name}/{apartment.exact_floor}/{layout.room_number}.{layout.variant}/{layout.type_of_apartment}" , 600, -575, 28, "dynamic")
         self.draw(can, 'Владелец проекта:', 1100, -700, 24)
-        self.draw(can, self.user.first_name, 975, -735, 24, "dynamic")
-        self.draw(can, 'г.АЛМАТЫ 2023', 675, -775, 24)
+        self.draw(can, self.user.full_name, 975, -735, 24, "dynamic")
+        self.draw(can, f'г. {residence.city.name} {current_year}', 675, -775, 24)
         
         can.save()
 
@@ -287,3 +296,24 @@ class TransactionRevoke(Timestamp):
     class Meta:
         verbose_name = "Возврат транзакции"
         verbose_name_plural = "Возвраты транзакций"
+
+
+class Ticket(Timestamp):
+    full_name = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.CharField(max_length=30, blank=True)
+    description = models.TextField(max_length=1000, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Тикет'
+        verbose_name_plural = 'Тикеты'
+        ordering = ['created_at']
+
+class TicketAttachment(Timestamp):
+    ticket = models.ForeignKey("Ticket", on_delete=models.CASCADE, blank=True)
+    name = models.CharField(max_length=100, blank=True)
+    file = models.FileField("Screenshot", upload_to='tickets/', blank=True)
+
+    class Meta:
+        verbose_name = 'Вложение для Тикета'
+        verbose_name_plural = 'Вложении  для Тикета'
