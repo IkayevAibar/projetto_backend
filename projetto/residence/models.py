@@ -22,11 +22,12 @@ class City(Timestamp):
 
 class Residence(Timestamp):
     slug = models.CharField(max_length=4, blank=True)
-    title = models.CharField(max_length=150, blank=True)
-    description = models.TextField(max_length=2500, blank=True)
+    title = models.CharField("Название ЖК", max_length=150, blank=True)
+    description = models.TextField("Описание", max_length=2500, blank=True)
     exploitation_date = models.DateField("Дата эксплуатации",default=timezone.now)
-    city = models.ForeignKey(City, on_delete=models.CASCADE , default=2, blank=True)
-    address = models.CharField(max_length=150, blank=True)
+    city = models.ForeignKey(City, verbose_name="Город", on_delete=models.CASCADE , default=2, blank=True)
+    address = models.CharField("Адрес", max_length=150, blank=True)
+    website_url = models.URLField("Сайт", max_length=150, blank=True, null=True)
     gen_plan = models.ImageField("Генеральный план", upload_to='residence/gen_plans/', blank=True, null=True)
     class Meta:
         verbose_name = 'Жилой комплекс'
@@ -46,7 +47,7 @@ class Attachment(Timestamp):
         verbose_name_plural = 'Вложении'
 
 class Cluster(Timestamp):
-    name = models.CharField(max_length=50, blank=True, help_text="Пример: Пятно/Блок 1/A")
+    name = models.CharField("Название", max_length=50, blank=True, help_text="Пример: Пятно/Блок 1/A")
     residence_id = models.ForeignKey("Residence", related_name='clusters', on_delete=models.CASCADE, blank=True)
     max_floor = models.IntegerField("Максимальный этаж", default=0, blank=True)
     date_to_start_sell = models.DateField("Дата начала продаж", blank=True, null=True)
@@ -56,18 +57,21 @@ class Cluster(Timestamp):
         ordering = ['name']
     
     def __str__(self):
-        return f"{self.name} из {self.residence_id.title}"
+        split_name = self.name.split(' ')
+        if(len(split_name)>1):
+            return f"{self.name} из {self.residence_id.title}"
+        return f"Пятно Блок-{self.name} из {self.residence_id.title}"
 
 class Floor(Timestamp):
     floor_numbers = models.CharField("Номера Этажей",max_length=50, blank=True, help_text="Пример: 1,2,3")
     cluster = models.ForeignKey("Cluster", related_name='floors', on_delete=models.CASCADE, blank=True)
-    scheme = models.ImageField("Схема", upload_to='floor/schemes/', blank=True)
+    scheme = models.FileField("Схема", upload_to='floor/schemes/', blank=True)
     class Meta:
         verbose_name = 'Этаж'
         verbose_name_plural = 'Этажи'
     
     def __str__(self):
-        return f"Этажи {self.floor_numbers} из {self.cluster.name}"
+        return f"Этажи {self.floor_numbers} из Блока {self.cluster.name}"
 
 
 class Apartment(Timestamp):
@@ -75,7 +79,7 @@ class Apartment(Timestamp):
     exact_floor = models.IntegerField("Точный номер этажа", blank=True)
     door_number = models.CharField("Номер квартиры",max_length=50, blank=True, help_text="132")
     room_number = models.IntegerField("Количество комнат", blank=True)
-    area = models.FloatField("Размер квартиры", blank=True)
+    area = models.FloatField("Плошадь(m²)", blank=True)
     layouts = models.ManyToManyField("Layout", verbose_name="Варианты планировки", related_name='apartments', blank=True)
     class Meta:
         verbose_name = 'Квартира'

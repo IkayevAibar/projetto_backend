@@ -55,18 +55,13 @@ class Order(models.Model):
     updated_at = models.DateTimeField("Изменено", auto_now_add=True)
 
     @staticmethod
-    def draw(can, text, x, y, font_size, type="static"):
-        print(text + " is drawing...")
-        can.setFont('ArialUnicode', font_size)
-        text_width = can.stringWidth(text, 'ArialUnicode', font_size)
+    def draw(can, text, x, y, font_size):
+        can.setFont('OpenSans', font_size)
+        text_width = can.stringWidth(text, 'OpenSans', font_size)
         text_height = font_size
         y = y 
-        if type == "dynamic":
-            x = x
-            can.drawCentredString(x, y, text)
-        else:
-            x = x - text_width
-            can.drawString(x, y, text)
+        x = x
+        can.drawCentredString(x, y, text)
 
     
     def generate_doc(self):
@@ -84,18 +79,18 @@ class Order(models.Model):
             case 4: room_count = "Четырёхкомнатная квартира"
             case _: room_count = apartment.room_number + "-комнатная квартира"
 
-        pdfmetrics.registerFont(TTFont('ArialUnicode', './utils/arial_unicode.ttf'))
+        pdfmetrics.registerFont(TTFont('OpenSans', './utils/opensans.ttf'))
 
         packet = io.BytesIO()
 
         can = canvas.Canvas(packet, pagesize=A3)
         can.rotate(90)
 
-        self.draw(can, 'Рабочий проект дизайн интерьера', 775, -430, 24)
-        self.draw(can, residence.title, 600, -525, 38, "dynamic")
-        self.draw(can, room_count + ": " + f"{residence.slug}/{cluster.name}/{apartment.exact_floor}/{layout.room_number}.{layout.variant}/{layout.type_of_apartment}" , 600, -575, 28, "dynamic")
-        self.draw(can, 'Владелец проекта:', 1100, -700, 24)
-        self.draw(can, self.user.full_name, 975, -735, 24, "dynamic")
+        self.draw(can, 'Рабочий проект дизайн интерьера', 600, -430, 24)
+        self.draw(can, residence.title, 600, -525, 38)
+        self.draw(can, room_count + ": " + f"{residence.slug}/{cluster.name}/{apartment.exact_floor}/{layout.room_number}.{layout.variant}/{layout.type_of_apartment}" , 600, -575, 28)
+        self.draw(can, 'Владелец проекта:', 1000, -700, 24)
+        self.draw(can, self.user.full_name, 975, -735, 24)
         self.draw(can, f'г. {residence.city.name} {current_year}', 675, -775, 24)
         
         can.save()
