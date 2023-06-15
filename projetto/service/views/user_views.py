@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return UserSerializer
     def get_permissions(self):
-        if self.action in ['create', 'send_sms_to_phone', 'verify_sms']:
+        if self.action in ['create', 'send_sms_to_phone', 'verify_sms', 'restore_password']:
             permission_classes = [AllowAny]
         elif self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy', 'get_all_orders']:
             permission_classes = [IsAuthenticated]
@@ -101,6 +101,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             if(password):
                 user = user_manager.create_user(username=username, password=password, sms_verified=sms_verified, full_name=full_name)
+                user.save()
             else:
                 raise ValidationError("Password is required for user creation.") 
 
@@ -143,7 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
 
-            return Response({'status': verification_check.status, 'access_token': access_token, 'refresh_token': refresh_token})
+            return Response({'status': verification_check.status, 'user': {'user_id': user.id, 'access_token': access_token, 'refresh_token': refresh_token}})
         else:
             return Response({'status': verification_check.status})
 
@@ -186,7 +187,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response({'status': verification.status})
  
-    @action(detail=True, methods=['get'], permission_classes = [IsAuthenticated])
+    @action(detail=True, methods=['get'])
     def get_all_orders(self, request, pk=None):
         status = request.query_params.get('status')
 
@@ -202,10 +203,14 @@ class UserViewSet(viewsets.ModelViewSet):
         request_body=ChangePasswordSerializer,
         operation_description='Восстановление пароля'
     )
-    @action(detail=True, methods=['post'], permission_classes = [AllowAny])
-    def restore_password(self, request, pk=None):
-        user = User.objects.get(id=pk)
-
+    @action(detail=False, methods=['post'])
+    def restore_password(self, request):
+        phone = request.data.get('phone')
+        try:
+            user = User.objects.get(username=phone)
+        except User.DoesNotExist:
+            return Response({'status': 'Пользователь c таким номерем не найден'})
+        
         verified_number = user.username
         otp_code = request.data.get('otp_code')
         client = Client(account_sid, auth_token)

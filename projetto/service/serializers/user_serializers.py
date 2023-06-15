@@ -59,6 +59,7 @@ class VerifySMSRequestSerializer(serializers.Serializer):
     phone_number = serializers.CharField(required=True)
 
 class ChangePasswordSerializer(serializers.Serializer):
+    phone = serializers.CharField(required=True)
     otp_code = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     confirm_password = serializers.CharField(required=True)

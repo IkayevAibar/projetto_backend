@@ -20,6 +20,7 @@ projetto/logs/**
 *.cpython-311.pyc
 *.cpython-38.pyc
 
+freedom_test.py
 twilio_test.py
 test.py
 pdf_utility.py
