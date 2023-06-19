@@ -232,6 +232,15 @@ redis_db = os.getenv('REDIS_DB')
 CELERY_BROKER_URL = f'redis://{redis_host}:{redis_port}/{redis_db}'
 CELERY_RESULT_BACKEND = f'redis://{redis_host}:{redis_port}/{redis_db}'
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Security Headers
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 3600
 
 
 CORS_ALLOW_ALL_ORIGINS = True
