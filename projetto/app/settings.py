@@ -199,9 +199,6 @@ SIMPLE_JWT = {
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': {
-        'Basic': {
-                'type': 'basic'
-        },
         'Bearer': {
                 'type': 'apiKey',
                 'name': 'Authorization',
@@ -253,3 +250,27 @@ CSRF_TRUSTED_ORIGINS = [
     "https://178.128.243.89"
     "https://178.128.243.89:8000"
 ]
+
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOWED_HEADERS = [
+    'Accept',
+    'Authorization',
+    'Content-Type',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_EXPOSE_HEADERS = [
+    'Content-Type',
+    'X-CSRFTOKEN',
+]
+
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 часа
