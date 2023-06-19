@@ -237,18 +237,4 @@ CELERY_RESULT_BACKEND = f'redis://{redis_host}:{redis_port}/{redis_db}'
 
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://localhost:8000",
-    "http://127.0.0.1:8080",
-    "http://192.168.100.8:8080",
-    "http://0.0.0.0:8080",
-    "http://0.0.0.0:8000",
-    "https://localhost:8080",
-    "https://localhost:8000",
-    "https://127.0.0.1:8080",
-    "https://192.168.100.8:8080",
-    "https://0.0.0.0:8080",
-    "https://0.0.0.0:8000",
-    "https://projetto.dev.thefactory.kz"
-]
+CORS_ALLOW_ALL_ORIGINS = True
