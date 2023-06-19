@@ -232,91 +232,62 @@ redis_db = os.getenv('REDIS_DB')
 CELERY_BROKER_URL = f'redis://{redis_host}:{redis_port}/{redis_db}'
 CELERY_RESULT_BACKEND = f'redis://{redis_host}:{redis_port}/{redis_db}'
 
+USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-
-# Security Headers
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_HSTS_SECONDS = 3600
 
 
+
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://projetto.dev.thefactory.kz",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-    "http://0.0.0.0:8080",
-    "http://192.168.100.8:8080",
-    "https://localhost:8080",
-    "https://127.0.0.1:8080",
-    "https://192.168.100.8:8080",
-    "https://0.0.0.0:8080",
-    "https://178.128.243.89:8080"
-    "https://178.128.243.89"
-    "https://178.128.243.89:8000"
-]
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # for localhost (REACT Default)
-    'http://192.168.0.50:3000',  # for network 
-    'http://localhost:8080',  # for localhost (Developlemt)
-    'http://192.168.0.50:8080',  # for network (Development)
-    'http://localhost:8000',  # for localhost (Developlemt)
-    'http://192.168.0.50:8000',  # for network (Development)
-    'https://localhost:8080',  # for localhost (Developlemt)
-    'https://192.168.0.50:8080',  # for network (Development)
-    'https://localhost:8000',  # for localhost (Developlemt)
-    'https://192.168.0.50:8000',  # for network (Development)
-    'http://0.0.0.0:8080',  # for localhost (Developlemt)
-    'https://0.0.0.0:8000',  # for localhost (Developlemt)
-]
-CORS_ALLOW_CREDENTIALS = True
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://projetto.dev.thefactory.kz",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+#     "http://0.0.0.0:8080",
+#     "http://192.168.100.8:8080",
+#     "https://localhost:8080",
+#     "https://127.0.0.1:8080",
+#     "https://192.168.100.8:8080",
+#     "https://0.0.0.0:8080",
+#     "https://178.128.243.89:8080"
+#     "https://178.128.243.89"
+#     "https://178.128.243.89:8000"
+# ]
 
-
-CSRF_TRUSTED_ORIGINS += [
-    'http://localhost:3000',  # for localhost (REACT Default)
-    'http://192.168.0.50:3000',  # for network 
-    'http://localhost:8080',  # for localhost (Developlemt)
-    'http://192.168.0.50:8080',  # for network (Development)
-]
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    'http://localhost:3000',  # for localhost (REACT Default)
-    'http://192.168.0.50:3000',  # for network 
-    'http://localhost:8080',  # for localhost (Developlemt)
-    'http://192.168.0.50:8080',  # for network (Development)
-    'http://localhost:8000',  # for localhost (Developlemt)
-    'http://192.168.0.50:8000',  # for network (Development)
-    'https://localhost:8080',  # for localhost (Developlemt)
-    'https://192.168.0.50:8080',  # for network (Development)
-    'https://localhost:8000',  # for localhost (Developlemt)
-    'https://192.168.0.50:8000',  # for network (Development)
-    'http://0.0.0.0:8080',  # for localhost (Developlemt)
-    'https://0.0.0.0:8000',  # for localhost (Developlemt)
-]
-
-CORS_ALLOWED_METHODS = [
-    'DELETE',
+CORS_ALLOW_METHODS = [
     'GET',
-    'OPTIONS',
-    'PATCH',
     'POST',
     'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
 ]
 
-CORS_ALLOWED_HEADERS = [
-    'Accept',
-    'Authorization',
-    'Content-Type',
-]
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with'
+]
 
 CORS_EXPOSE_HEADERS = [
-    'Content-Type',
-    'X-CSRFTOKEN',
+    'content-type',
+    'x-custom-header'
 ]
 
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24 часа
+
+CORS_ALLOW_REDIRECTS = False
