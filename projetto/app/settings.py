@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'corsheaders',
     # django apps
     'residence',
     'service'
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -232,3 +234,42 @@ redis_db = os.getenv('REDIS_DB')
 
 CELERY_BROKER_URL = f'redis://{redis_host}:{redis_port}/{redis_db}'
 CELERY_RESULT_BACKEND = f'redis://{redis_host}:{redis_port}/{redis_db}'
+
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://192.168.100.8:8080"
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+]
+
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with'
+]
+
+CORS_EXPOSE_HEADERS = [
+    'content-type',
+    'x-custom-header'
+]
+
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 часа
+
+CORS_ALLOW_REDIRECTS = False
