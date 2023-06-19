@@ -250,6 +250,43 @@ CSRF_TRUSTED_ORIGINS = [
     "https://178.128.243.89"
     "https://178.128.243.89:8000"
 ]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',  # for localhost (REACT Default)
+    'http://192.168.0.50:3000',  # for network 
+    'http://localhost:8080',  # for localhost (Developlemt)
+    'http://192.168.0.50:8080',  # for network (Development)
+    'http://localhost:8000',  # for localhost (Developlemt)
+    'http://192.168.0.50:8000',  # for network (Development)
+    'https://localhost:8080',  # for localhost (Developlemt)
+    'https://192.168.0.50:8080',  # for network (Development)
+    'https://localhost:8000',  # for localhost (Developlemt)
+    'https://192.168.0.50:8000',  # for network (Development)
+    'http://0.0.0.0:8080',  # for localhost (Developlemt)
+    'https://0.0.0.0:8000',  # for localhost (Developlemt)
+]
+CORS_ALLOW_CREDENTIALS = True
+
+
+CSRF_TRUSTED_ORIGINS += [
+    'http://localhost:3000',  # for localhost (REACT Default)
+    'http://192.168.0.50:3000',  # for network 
+    'http://localhost:8080',  # for localhost (Developlemt)
+    'http://192.168.0.50:8080',  # for network (Development)
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:3000',  # for localhost (REACT Default)
+    'http://192.168.0.50:3000',  # for network 
+    'http://localhost:8080',  # for localhost (Developlemt)
+    'http://192.168.0.50:8080',  # for network (Development)
+    'http://localhost:8000',  # for localhost (Developlemt)
+    'http://192.168.0.50:8000',  # for network (Development)
+    'https://localhost:8080',  # for localhost (Developlemt)
+    'https://192.168.0.50:8080',  # for network (Development)
+    'https://localhost:8000',  # for localhost (Developlemt)
+    'https://192.168.0.50:8000',  # for network (Development)
+    'http://0.0.0.0:8080',  # for localhost (Developlemt)
+    'https://0.0.0.0:8000',  # for localhost (Developlemt)
+]
 
 CORS_ALLOWED_METHODS = [
     'DELETE',
