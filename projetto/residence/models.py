@@ -29,6 +29,7 @@ class Residence(Timestamp):
     address = models.CharField("Адрес", max_length=150, blank=True)
     website_url = models.URLField("Сайт", max_length=150, blank=True, null=True)
     gen_plan = models.ImageField("Генеральный план", upload_to='residence/gen_plans/', blank=True, null=True)
+    poster = models.ImageField("Постер", upload_to='residence/posters/', blank=True, null=True)
     class Meta:
         verbose_name = 'Жилой комплекс'
         verbose_name_plural = 'Жилые комплексы'
