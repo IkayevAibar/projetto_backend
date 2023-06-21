@@ -63,7 +63,7 @@ class UserViewSet(mixins.UpdateModelMixin,
             pass
         
         if(user):
-            return Response({'user_status': "already exist", 'user_id': user.id})
+            return {'user_status': "already exist", 'user_id': user.id}
         # Создание нового пользователя, если он не существует
         user = User.objects.create_user(username=phone_number, sms_verified=True)
         # Генерация токена
@@ -103,7 +103,7 @@ class UserViewSet(mixins.UpdateModelMixin,
             try:
                 verification_check = client.verify.v2.services(verify_sid) \
                     .verification_checks \
-                    .create(to=verified_number, code=otp_code)
+                    .create(to="+"+verified_number, code=otp_code)
             except TwilioRestException as e:
                 return Response({'status':e.code})
             
@@ -152,7 +152,7 @@ class UserViewSet(mixins.UpdateModelMixin,
             try:
                 verification = client.verify.v2.services(verify_sid) \
                     .verifications \
-                    .create(to=verified_number, channel="sms", locale="ru")
+                    .create(to="+"+verified_number, channel="sms", locale="ru")
             except TwilioRestException as e:
                 return Response({'status':e.code})
             
