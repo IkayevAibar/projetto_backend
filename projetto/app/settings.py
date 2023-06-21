@@ -204,7 +204,9 @@ SWAGGER_SETTINGS = {
                 'name': 'Authorization',
                 'in': 'header'
         }
-    }
+    },
+    'DOC_EXPANSION': 'none',
+
 }
 
 # DJOSER = {
@@ -221,6 +223,11 @@ SWAGGER_SETTINGS = {
 account_sid = os.getenv('SMS_ACC_SID')
 auth_token = os.getenv('SMS_AUTH_TOKEN')
 verify_sid = os.getenv('SMS_VER_SID')
+
+sms_version_type = os.getenv('SMS_VER_TYPE')
+
+sms_acc_sid_prod = os.getenv('SMS_ACC_SID_PROD')
+sms_acc_pass_prod = os.getenv('SMS_ACC_PASS_PROD')
 
 payment_get = os.getenv('PAYMENT_GET')
 payment_give = os.getenv('PAYMENT_GIVE')

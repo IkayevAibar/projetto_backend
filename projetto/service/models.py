@@ -312,3 +312,22 @@ class TicketAttachment(Timestamp):
     class Meta:
         verbose_name = 'Вложение для Тикета'
         verbose_name_plural = 'Вложении  для Тикета'
+
+
+class SMSMessage(Timestamp):
+    STATUS_SMS = (
+        ('sent', 'Отправлено'),
+        ('not_sent', 'Не отправлено'),
+        ('success', 'Подтверждено')
+    )
+    sms_status = models.CharField(max_length=50, choices=STATUS_SMS, default="sent", blank=True)
+    phone = models.CharField(max_length=15)
+    code = models.CharField(max_length=4)
+
+    def __str__(self):
+        return f'SMS to {self.phone} - Code: {self.code}'
+
+    class Meta:
+        verbose_name = 'SMS сообщение'
+        verbose_name_plural = 'SMS сообщения'
+        ordering = ['-created_at']

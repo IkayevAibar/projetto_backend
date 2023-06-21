@@ -1,5 +1,5 @@
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
@@ -12,16 +12,19 @@ from twilio.base.exceptions import TwilioRestException
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-from service.models import User, Order
+from service.models import User, Order, SMSMessage
 from service.serializers.user_serializers import  ChangePasswordSerializer, UserSerializer, UserCreateSerializer, \
                                                 SendSMSRequestSerializer, VerifySMSRequestSerializer, UserListSerializer
 from service.serializers.order_serializers import OrderSerializer
 
-from app.settings import account_sid, auth_token, verify_sid
+from app.settings import account_sid, auth_token, verify_sid, sms_acc_sid_prod, sms_acc_pass_prod, sms_version_type
 
+from .sms_views import send_sms, generate_code
 
-
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.UpdateModelMixin,
+                   mixins.RetrieveModelMixin, 
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -31,18 +34,18 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
-        elif self.action in 'send_sms':
+        elif self.action in 'send_sms_to_phone':
             return SendSMSRequestSerializer
-        elif self.action in 'verify_sms':
+        elif self.action in 'verify_sms_and_register':
             return VerifySMSRequestSerializer
         elif self.action in 'restore_password':
             return ChangePasswordSerializer
         elif self.action in 'list':
             return UserListSerializer
-        
         return UserSerializer
+    
     def get_permissions(self):
-        if self.action in ['create', 'send_sms_to_phone', 'verify_sms', 'restore_password']:
+        if self.action in ['create', 'send_sms_to_phone', 'verify_sms_and_register', 'restore_password']:
             permission_classes = [AllowAny]
         elif self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy', 'get_all_orders']:
             permission_classes = [IsAuthenticated]
@@ -51,102 +54,66 @@ class UserViewSet(viewsets.ModelViewSet):
     
         return [permission() for permission in permission_classes]
     
-    @swagger_auto_schema(
-        method='get',
-        operation_summary='Get user by phone',
-        operation_description='Retrieve a user by phone number.',
-        manual_parameters=[
-            openapi.Parameter(
-                name='phone',
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                description='Phone number of the user.',
-                required=True
-            )
-        ],
-        responses={
-            200: UserSerializer,
-            404: 'User not found.'
-        }
-    )
-    @action(detail=False, methods=['GET'])
-    def get_by_phone(self, request):
-        phone = request.query_params.get('phone')
-        if phone:
-            phone = phone.replace(' ', '')
-            if not phone.startswith('+'):
-                phone = '+' + phone
-
+    @staticmethod
+    def get_or_create_user(phone_number):
+        user = None
         try:
-            user = User.objects.get(username=phone)
+            user = User.objects.get(username=phone_number)
         except User.DoesNotExist:
-            return Response({'detail': 'Пользователя с таким номер нет'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = self.get_serializer(user)
-
-        return Response(serializer.data)
-
-    def create(self, request):
-        user_manager = User.objects
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+            pass
         
-        username = serializer.validated_data.get('username')
-        password = serializer.validated_data.get('password')
-        full_name = serializer.validated_data.get('full_name')
-        sms_verified = serializer.validated_data.get('sms_verified')
-        
-        if sms_verified == True:
-            user = user_manager.create_user(username=username, password=password, sms_verified=sms_verified, full_name=full_name)
-        else:
-            if(password):
-                user = user_manager.create_user(username=username, password=password, sms_verified=sms_verified, full_name=full_name)
-                user.save()
-            else:
-                raise ValidationError("Password is required for user creation.") 
+        if(user):
+            return Response({'user_status': "already exist", 'user_id': user.id})
+        # Создание нового пользователя, если он не существует
+        user = User.objects.create_user(username=phone_number, sms_verified=True)
+        # Генерация токена
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
 
-        headers = self.get_success_headers(serializer.data)
+        return {'user_status': "created", 'user_id': user.id, 'access_token': access_token, 'refresh_token': refresh_token}
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    
     @swagger_auto_schema(
         request_body=VerifySMSRequestSerializer,
-        operation_description='Verify SMS verification code sended to your phone number'
+        operation_description='Потверждение номера телефона и регистрация пользователя',
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
-    def verify_sms(self, request, pk=None):
-        verified_number = request.data.get('phone_number')
-        otp_code = request.data.get('otp_code')
-        client = Client(account_sid, auth_token)
+    def verify_sms_and_register(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        verified_number = serializer.validated_data.get('phone_number')
+        otp_code = serializer.validated_data.get('otp_code')
 
-        try:
-            verification_check = client.verify.v2.services(verify_sid) \
-                .verification_checks \
-                .create(to=verified_number, code=otp_code)
-        except TwilioRestException as e:
-            return Response({'status':e.code})
-        
-        if verification_check.status == 'approved':
-            # Аутентификация пользователя по номеру телефона
-            user = None
+        if(sms_version_type == "PROD"):
+            recipient = verified_number
+            code = otp_code
+
             try:
-                user = User.objects.get(username=verified_number)
-            except User.DoesNotExist:
-                pass
-            
-            if(user):
-                return Response({'status': verification_check.status, 'user_id': user.id})
-            # Создание нового пользователя, если он не существует
-            user = User.objects.create_user(username=verified_number, sms_verified=True)
-            # Генерация токена
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-            refresh_token = str(refresh)
+                sms_message = SMSMessage.objects.get(phone=recipient, code=code, sms_status='sent')
+                sms_message.sms_status = "success"
+                sms_message.save()
 
-            return Response({'status': verification_check.status, 'user': {'user_id': user.id, 'access_token': access_token, 'refresh_token': refresh_token}})
+                user_response = self.get_or_create_user(recipient)
+                return Response({'success': True, 'message': 'Код подтвержден', 'user': user_response})
+            except SMSMessage.DoesNotExist:
+                return Response({'success': False, 'message': 'Неверный код подтверждения'})
         else:
-            return Response({'status': verification_check.status})
+            client = Client(account_sid, auth_token)
+
+            try:
+                verification_check = client.verify.v2.services(verify_sid) \
+                    .verification_checks \
+                    .create(to=verified_number, code=otp_code)
+            except TwilioRestException as e:
+                return Response({'status':e.code})
+            
+            if verification_check.status == 'approved':
+                # Аутентификация пользователя по номеру телефона
+                
+                user_response = self.get_or_create_user(verified_number)
+                return Response({'status': verification_check.status, 'user': user_response})
+            else:
+                return Response({'status': verification_check.status})
 
     @swagger_auto_schema(
         request_body=SendSMSRequestSerializer,
@@ -154,39 +121,43 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
     def send_sms_to_phone(self, request, pk=None):
-        verified_number = request.data.get('phone_number')
-        client = Client(account_sid, auth_token)
-        try:
-            verification = client.verify.v2.services(verify_sid) \
-                .verifications \
-                .create(to=verified_number, channel="sms", locale="ru")
-        except TwilioRestException as e:
-            return Response({'status':e.code})
-        
-        return Response({'status': verification.status})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        verified_number = serializer.validated_data.get('phone_number')
 
-    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
-    def send_sms(self, request, pk=None):
-        if pk:
-            try:
-                user = User.objects.get(id=pk)
-            except User.DoesNotExist:
-                return Response({'status': 'Пользователь не найден'})
+        if(verified_number is None):
+            return Response({'status': 'Номер телефона не указан'})
+
+        if(sms_version_type == "PROD"):
+            username = sms_acc_sid_prod
+            password = sms_acc_pass_prod
+            recipient = verified_number
+            # Генерируем код
+            code = generate_code()
+
+            # Создаем текст сообщения
+            message = f'Код для подтверждения регистрации Projetto.kz: {code}'
+
+            if send_sms(username, password, recipient, message):
+                # Отправка SMS прошла успешно
+                # Сохраняем сообщение в базу данных
+                SMSMessage.objects.create(phone=recipient, code=code, sms_status='sent')
+                return Response({'success': True, 'message': 'SMS успешно отправлено'})
+            else:
+                # Ошибка при отправке SMS
+                SMSMessage.objects.create(phone=recipient, code=code, sms_status='not_sent')
+                return Response({'success': False, 'message': 'Не удалось отправить SMS'})
         else:
-            return Response({'status': 'ID должен быть указан'})
-        
-        # Отправка SMS
-        verified_number = user.username
-        client = Client(account_sid, auth_token)
-        try:
-            verification = client.verify.v2.services(verify_sid) \
-                .verifications \
-                .create(to=verified_number, channel="sms", locale="ru")
-        except TwilioRestException as e:
-            return Response({'status':e.code})
-        
-        return Response({'status': verification.status})
- 
+            client = Client(account_sid, auth_token)
+            try:
+                verification = client.verify.v2.services(verify_sid) \
+                    .verifications \
+                    .create(to=verified_number, channel="sms", locale="ru")
+            except TwilioRestException as e:
+                return Response({'status':e.code})
+            
+            return Response({'status': verification.status})
+
     @action(detail=True, methods=['get'])
     def get_all_orders(self, request, pk=None):
         status = request.query_params.get('status')
@@ -205,14 +176,16 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['post'])
     def restore_password(self, request):
-        phone = request.data.get('phone')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        phone = serializer.validated_data.get('phone')
         try:
             user = User.objects.get(username=phone)
         except User.DoesNotExist:
             return Response({'status': 'Пользователь c таким номерем не найден'})
         
         verified_number = user.username
-        otp_code = request.data.get('otp_code')
+        otp_code = serializer.validated_data.get('otp_code')
         client = Client(account_sid, auth_token)
 
         try:
@@ -223,8 +196,8 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status':e.code})
 
         if verification_check.status == 'approved':
-            password = request.data.get('password')
-            confirm_password = request.data.get('confirm_password')
+            password = serializer.validated_data.get('password')
+            confirm_password = serializer.validated_data.get('confirm_password')
             if(password != confirm_password):
                 return Response({'status': 'passwords not match'})
             user.set_password(password)

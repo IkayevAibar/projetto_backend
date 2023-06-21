@@ -54,12 +54,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class SendSMSRequestSerializer(serializers.Serializer):
     phone_number = serializers.CharField(required=True)
 
+    def validate_phone_number(self, phone_number):
+        cleaned_phone = ''.join(filter(str.isdigit, phone_number))
+        if len(cleaned_phone) not in [11, 12]:
+            raise serializers.ValidationError("Некорректный номер телефона")
+        return cleaned_phone
+
 class VerifySMSRequestSerializer(serializers.Serializer):
     otp_code = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=True)
+
+    def validate_phone_number(self, phone_number):
+        cleaned_phone = ''.join(filter(str.isdigit, phone_number))
+        if len(cleaned_phone) not in [11, 12]:
+            raise serializers.ValidationError("Некорректный номер телефона")
+        return cleaned_phone
 
 class ChangePasswordSerializer(serializers.Serializer):
     phone = serializers.CharField(required=True)
     otp_code = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     confirm_password = serializers.CharField(required=True)
+
+    def validate_phone(self, phone):
+        cleaned_phone = ''.join(filter(str.isdigit, phone))
+        if len(cleaned_phone) not in [11, 12]:
+            raise serializers.ValidationError("Некорректный номер телефона")
+        return cleaned_phone
