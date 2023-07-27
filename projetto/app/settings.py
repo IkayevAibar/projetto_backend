@@ -250,52 +250,26 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_HSTS_SECONDS = 3600
 
-
-
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://projetto.dev.thefactory.kz",
-#     "http://localhost:8080",
-#     "http://127.0.0.1:8080",
-#     "http://0.0.0.0:8080",
-#     "http://192.168.100.8:8080",
-#     "https://localhost:8080",
-#     "https://127.0.0.1:8080",
-#     "https://192.168.100.8:8080",
-#     "https://0.0.0.0:8080",
-#     "https://178.128.243.89:8080"
-#     "https://178.128.243.89"
-#     "https://178.128.243.89:8000"
-# ]
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS'
-]
-
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with'
-]
-
-CORS_EXPOSE_HEADERS = [
-    'content-type',
-    'x-custom-header'
-]
-
-CORS_PREFLIGHT_MAX_AGE = 86400  # 24 часа
-
-CORS_ALLOW_REDIRECTS = False
+CORS_ALLOW_CREDENTIALS = True
