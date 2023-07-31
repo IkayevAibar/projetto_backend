@@ -81,3 +81,13 @@ class ChangePasswordSerializer(serializers.Serializer):
         if len(cleaned_phone) not in [11, 12]:
             raise serializers.ValidationError("Некорректный номер телефона")
         return cleaned_phone
+
+class SetPasswordSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(required=True)
+    password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+    
+    def validate(self, data):
+        if data['password'] != data['confirm_password']:
+            raise serializers.ValidationError("Пароли не совпадают")
+        return data

@@ -14,7 +14,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from service.models import User, Order, SMSMessage
 from service.serializers.user_serializers import  ChangePasswordSerializer, UserSerializer, UserCreateSerializer, \
-                                                SendSMSRequestSerializer, VerifySMSRequestSerializer, UserListSerializer
+                                                SendSMSRequestSerializer, VerifySMSRequestSerializer, UserListSerializer, SetPasswordSerializer, CheckIsPasswordSetSerializer
 from service.serializers.order_serializers import OrderSerializer
 
 from app.settings import account_sid, auth_token, verify_sid, sms_acc_sid_prod, sms_acc_pass_prod, sms_version_type
@@ -63,7 +63,8 @@ class UserViewSet(mixins.UpdateModelMixin,
             pass
         
         if(user):
-            return {'user_status': "already exist", 'user_id': user.id}
+            empty_password = user.check_password('')
+            return {'user_status': "already exist", 'user_id': user.id, 'empty_password': empty_password}
         # Создание нового пользователя, если он не существует
         user = User.objects.create_user(username=phone_number, sms_verified=True)
         # Генерация токена
@@ -206,3 +207,20 @@ class UserViewSet(mixins.UpdateModelMixin,
         else:
             return Response({'status': 'error'})
     
+    @action(detail=False, methods=['post'])
+    def set_password(self, request):
+        serializer = SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = serializer.validated_data.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'status': 'Пользователь c таким ID не найден'})
+        
+        password = serializer.validated_data.get('password')
+        confirm_password = serializer.validated_data.get('confirm_password')
+        if(password != confirm_password):
+            return Response({'status': 'passwords not match'})
+        user.set_password(password)
+        user.save()
+        return Response({'status': 'success'})
