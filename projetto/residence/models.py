@@ -89,7 +89,7 @@ class Apartment(Timestamp):
         ordering = ['id']
     
     def __str__(self):
-        return f"{self.id}. Квартира №{self.door_number} из этажов {self.floor.floor_numbers}"
+        return f"{self.id}. Квартира №{self.door_number} из этажов {self.floor.floor_numbers} из Блока {self.floor.cluster.name} из {self.floor.cluster.residence_id.title}"
 
 
 
