@@ -3,6 +3,7 @@ from django.urls import reverse, path
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.contrib.admin.widgets import ForeignKeyRawIdWidget, FilteredSelectMultiple
 
 from .models import Attachment, Cluster, Floor, Layout, Residence, Apartment, City
 from .serializers import ResidenceSerializer, ClusterSerializer
@@ -14,19 +15,30 @@ from django import forms
 class LayoutApartmentForm(forms.ModelForm):
     apartments = forms.ModelMultipleChoiceField(
         queryset=Apartment.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+        widget=FilteredSelectMultiple("Apartments", is_stacked=False),
         required=False,
-        
     )
 
     class Meta:
         model = Layout
         fields = ['apartments', 'variant', 'type_of_apartment', 'pdf', 'price', 'room_number']
     
+    # def __init__(self, *args, **kwargs):
+    #     super(LayoutApartmentForm, self).__init__(*args, **kwargs)
+    #     if self.instance.pk:
+    #         self.fields['apartments'].initial = self.instance.apartments.all()
+
     def __init__(self, *args, **kwargs):
         super(LayoutApartmentForm, self).__init__(*args, **kwargs)
         if self.instance.pk:
             self.fields['apartments'].initial = self.instance.apartments.all()
+    
+    def save(self, commit=True):
+        layout = super().save(commit)
+        if commit:
+            selected_apartments = self.cleaned_data['apartments']
+            layout.apartments.set(selected_apartments)
+        return layout
 
 
 # Register your models here.
@@ -109,13 +121,10 @@ class LayoutAdmin(admin.ModelAdmin):
         layout = self.get_object(request, object_id)
         extra_context = extra_context or {}
         extra_context['apartments'] = Apartment.objects.all()
-        extra_context['selected_apartments'] = layout.apartments.all()
-
-        # Set initial values for checkboxes based on existing relationships
-        initial = {'apartments': layout.apartments.all()}
-        extra_context['form'] = self.form(initial=initial)
-
+        extra_context['selected_apartment_ids'] = layout.apartments.values_list('id', flat=True)
+        
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
 
 class ApartmentAdmin(admin.ModelAdmin):
     list_display = ('door_number', 'room_number', 'floor', 'exact_floor', 'created_at', 'updated_at')
