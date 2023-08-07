@@ -14,7 +14,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from service.models import User, Order, SMSMessage
 from service.serializers.user_serializers import  ChangePasswordSerializer, UserSerializer, UserCreateSerializer, \
-                                                SendSMSRequestSerializer, VerifySMSRequestSerializer, UserListSerializer, SetPasswordSerializer, CheckIsPasswordSetSerializer
+                                                SendSMSRequestSerializer, VerifySMSRequestSerializer, UserListSerializer, SetPasswordSerializer
 from service.serializers.order_serializers import OrderSerializer
 
 from app.settings import account_sid, auth_token, verify_sid, sms_acc_sid_prod, sms_acc_pass_prod, sms_version_type

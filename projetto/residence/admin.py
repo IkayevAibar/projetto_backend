@@ -9,6 +9,26 @@ from .serializers import ResidenceSerializer, ClusterSerializer
 from .views import ResidenceViewSet
 # from service.models import User
 
+from django import forms
+
+class LayoutApartmentForm(forms.ModelForm):
+    apartments = forms.ModelMultipleChoiceField(
+        queryset=Apartment.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        
+    )
+
+    class Meta:
+        model = Layout
+        fields = ['apartments', 'variant', 'type_of_apartment', 'pdf', 'price', 'room_number']
+    
+    def __init__(self, *args, **kwargs):
+        super(LayoutApartmentForm, self).__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['apartments'].initial = self.instance.apartments.all()
+
+
 # Register your models here.
 class LayoutInline(admin.TabularInline):
     model = Apartment.layouts.through
@@ -78,6 +98,24 @@ class FloorAdmin(admin.ModelAdmin):
 class LayoutAdmin(admin.ModelAdmin):
     list_display = ('variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
     search_fields = ('name', 'variant', 'type_of_apartment')
+
+    form = LayoutApartmentForm
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.apartments.set(form.cleaned_data['apartments'])
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        layout = self.get_object(request, object_id)
+        extra_context = extra_context or {}
+        extra_context['apartments'] = Apartment.objects.all()
+        extra_context['selected_apartments'] = layout.apartments.all()
+
+        # Set initial values for checkboxes based on existing relationships
+        initial = {'apartments': layout.apartments.all()}
+        extra_context['form'] = self.form(initial=initial)
+
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 class ApartmentAdmin(admin.ModelAdmin):
     list_display = ('door_number', 'room_number', 'floor', 'exact_floor', 'created_at', 'updated_at')
