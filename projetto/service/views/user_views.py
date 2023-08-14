@@ -47,7 +47,7 @@ class UserViewSet(mixins.UpdateModelMixin,
         return UserSerializer
     
     def get_permissions(self):
-        if self.action in ['create', 'send_sms_to_phone', 'verify_sms_and_register', 'restore_password']:
+        if self.action in ['create', 'send_sms_to_phone', 'verify_sms_and_authorization', 'restore_password']:
             permission_classes = [AllowAny]
         elif self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy', 'get_all_orders']:
             permission_classes = [IsAuthenticated]
