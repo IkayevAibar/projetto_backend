@@ -42,6 +42,8 @@ class UserViewSet(mixins.UpdateModelMixin,
             return ChangePasswordSerializer
         elif self.action in 'list':
             return UserListSerializer
+        elif self.action in 'set_password':
+            return SetPasswordSerializer
         return UserSerializer
     
     def get_permissions(self):
@@ -207,6 +209,26 @@ class UserViewSet(mixins.UpdateModelMixin,
         else:
             return Response({'status': 'error'})
     
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Response(
+                description='Password set successfully',
+                examples={
+                    'application/json': {
+                        'status': 'success'
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description='Bad request',
+                examples={
+                    'application/json': {
+                        'status': 'Пользователь с таким ID не найден или пароли не совпадают'
+                    }
+                }
+            ),
+        }
+    )
     @action(detail=False, methods=['post'])
     def set_password(self, request):
         serializer = SetPasswordSerializer(data=request.data)

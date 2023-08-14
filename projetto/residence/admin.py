@@ -1,16 +1,17 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.http import HttpResponse
 from django.urls import reverse, path
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget, FilteredSelectMultiple
+from django import forms
 
 from .models import Attachment, Cluster, Floor, Layout, Residence, Apartment, City
 from .serializers import ResidenceSerializer, ClusterSerializer
 from .views import ResidenceViewSet
 # from service.models import User
 
-from django import forms
 
 class LayoutApartmentForm(forms.ModelForm):
     apartments = forms.ModelMultipleChoiceField(

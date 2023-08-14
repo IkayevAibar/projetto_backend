@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # django apps
     'residence',
-    'service'
+    'service',
 ]
 
 MIDDLEWARE = [
