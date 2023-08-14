@@ -69,8 +69,6 @@ class UserViewSet(mixins.UpdateModelMixin,
             user_status = {'user_status': "already exist", 'user_id': user.id, 'empty_password': empty_password}
         else:
             # Создание нового пользователя, если он не существует
-            print("Создание нового пользователя")
-            print(phone_number)
             user = User.objects.create_user(username=phone_number, sms_verified=True)
             user_status = {'user_status': "created", 'user_id': user.id}
         # Генерация токена
@@ -101,7 +99,7 @@ class UserViewSet(mixins.UpdateModelMixin,
                 sms_message.save()
 
                 user_response = self.get_or_create_user(recipient)
-                return Response({'success': True, 'message': 'Код подтвержден', 'user': user_response})
+                return Response({'success': True, 'message': 'Код подтвержден', 'result': user_response})
             except SMSMessage.DoesNotExist:
                 return Response({'success': False, 'message': 'Неверный код подтверждения'})
         else:
