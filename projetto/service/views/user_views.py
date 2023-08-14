@@ -36,7 +36,7 @@ class UserViewSet(mixins.UpdateModelMixin,
             return UserCreateSerializer
         elif self.action in 'send_sms_to_phone':
             return SendSMSRequestSerializer
-        elif self.action in 'verify_sms_and_register':
+        elif self.action in 'verify_sms_and_authorization':
             return VerifySMSRequestSerializer
         elif self.action in 'restore_password':
             return ChangePasswordSerializer
@@ -66,22 +66,26 @@ class UserViewSet(mixins.UpdateModelMixin,
         
         if(user):
             empty_password = user.check_password('')
-            return {'user_status': "already exist", 'user_id': user.id, 'empty_password': empty_password}
-        # Создание нового пользователя, если он не существует
-        user = User.objects.create_user(username=phone_number, sms_verified=True)
+            user_status = {'user_status': "already exist", 'user_id': user.id, 'empty_password': empty_password}
+        else:
+            # Создание нового пользователя, если он не существует
+            print("Создание нового пользователя")
+            print(phone_number)
+            user = User.objects.create_user(username=phone_number, sms_verified=True)
+            user_status = {'user_status': "created", 'user_id': user.id}
         # Генерация токена
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        return {'user_status': "created", 'user_id': user.id, 'access_token': access_token, 'refresh_token': refresh_token}
+        return {'user': user_status, 'access_token': access_token, 'refresh_token': refresh_token}
 
     @swagger_auto_schema(
         request_body=VerifySMSRequestSerializer,
         operation_description='Потверждение номера телефона и регистрация пользователя',
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
-    def verify_sms_and_register(self, request, pk=None):
+    def verify_sms_and_authorization(self, request, pk=None):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         verified_number = serializer.validated_data.get('phone_number')
@@ -114,7 +118,7 @@ class UserViewSet(mixins.UpdateModelMixin,
                 # Аутентификация пользователя по номеру телефона
                 
                 user_response = self.get_or_create_user(verified_number)
-                return Response({'status': verification_check.status, 'user': user_response})
+                return Response({'status': verification_check.status, 'result': user_response})
             else:
                 return Response({'status': verification_check.status})
 
