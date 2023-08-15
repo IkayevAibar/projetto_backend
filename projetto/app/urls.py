@@ -15,8 +15,8 @@ from drf_yasg import openapi
 
 from service.views.user_views import UserViewSet
 from service.views.order_views import OrderViewSet
-from service.views.transaction_views import TransactionViewSet
 from service.views.ticket_views import TicketViewSet, TicketAttachmentViewSet
+from service.views.freedom_views import FreedomCheckRequestViewSet, FreedomResultRequestViewSet
 
 from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet, FloorViewSet, ApartmentViewSet, \
                             LayoutViewSet, CityViewSet
@@ -24,7 +24,6 @@ from residence.views import ResidenceViewSet, AttachmentViewSet, ClusterViewSet,
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'orders', OrderViewSet)
-router.register(r'transactions', TransactionViewSet)
 router.register(r'residences', ResidenceViewSet)
 router.register(r'attachments', AttachmentViewSet)
 router.register(r'clusters', ClusterViewSet)
@@ -34,6 +33,8 @@ router.register(r'layouts', LayoutViewSet)
 router.register(r'cities', CityViewSet)
 router.register(r'tickets', TicketViewSet)
 router.register(r'ticket_attachments', TicketAttachmentViewSet)
+router.register(r'freedom_check', FreedomCheckRequestViewSet)
+router.register(r'freedom_result', FreedomResultRequestViewSet)
 
 schema_view = get_schema_view(
    openapi.Info(

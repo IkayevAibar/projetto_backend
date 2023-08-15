@@ -123,175 +123,6 @@ class Order(models.Model):
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
-class TransactionResponce(Timestamp):
-    script_name = models.CharField("Имя вызываемого скрипта (от последнего / до конца или ?)", max_length=200, blank=True, null=True)
-    order = models.ForeignKey(Order, verbose_name="Заказ", on_delete=models.CASCADE, null=True, blank=True)
-    transaction_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-
-    #payment
-    pg_status = models.CharField("Статус запроса", max_length=20) # ok, error
-    pg_description = models.CharField("Описание статуса", max_length=200, blank=True, null=True)
-    pg_payment_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-    pg_redirect_url = models.CharField("URL для перехода на страницу оплаты", max_length=200, blank=True, null=True)
-    pg_redirect_url_type = models.CharField("Тип перехода на страницу оплаты", max_length=200, blank=True, null=True)
-    pg_redirect_qr = models.CharField("QR-код для перехода на страницу оплаты", max_length=200, blank=True, null=True)
-
-    #status
-    pg_transaction_status = models.CharField("Статус транзакции", max_length=200, blank=True, null=True) 
-    '''
-        Статус	    Описание
-        ------------------------------------------------------
-        partial	    Новый платеж
-        pending	    Ожидание плательщика или платежной системы
-        refunded	По платежу прошел возврат
-        revoked	    По платежу прошла отмена
-        ok	        Платеж успешно завершен
-        failed	    Платеж в ошибке
-        incomplete	Истекло время жизни платежа
-    '''
-    pg_testing_mode = models.CharField("Тестовый режим", max_length=200, blank=True, null=True) # 0 - платеж в боевом режиме 1 - платеж в тестовом режиме
-    pg_create_date = models.CharField("Дата создания платежа", max_length=200, blank=True, null=True)
-    pg_can_reject = models.CharField("Возможность отмены платежа", max_length=200, blank=True, null=True) # 0 - отмена платежа невозможна 1 - отмена платежа возможна
-    pg_captured = models.CharField("Платеж подтвержден", max_length=200, blank=True, null=True) # 0 - платеж не подтвержден 1 - платеж подтвержден
-    pg_card_pan = models.CharField("Маскированный Номер карты", max_length=200, blank=True, null=True)
-    pg_card_id = models.CharField("Идентификатор карты", max_length=200, blank=True, null=True)
-    pg_card_token = models.CharField("Токен карты", max_length=200, blank=True, null=True)
-    pg_card_hash = models.CharField("Хэш карты", max_length=200, blank=True, null=True)
-    pg_failure_code = models.CharField("Код ошибки", max_length=200, blank=True, null=True)
-    pg_failure_description = models.CharField("Описание ошибки", max_length=200, blank=True, null=True)
-
-    #cancel and revoke
-    pg_error_code = models.CharField("Код ошибки", max_length=200, blank=True, null=True)
-    pg_error_description = models.CharField("Описание ошибки", max_length=200, blank=True, null=True)
-
-    #for all
-    pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-    pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-
-    def __str__(self):
-        return f"Транзакция #{self.pk}"
-    
-    class Meta:
-        verbose_name = "Транзакция"
-        verbose_name_plural = "Транзакции"
-
-class TransactionPayment(Timestamp):
-    #required
-    pg_order_id = models.CharField("ID заказа*", max_length=200, blank=True, null=True)
-    pg_merchant_id = models.CharField("ID магазина*", max_length=200, blank=True, null=True)
-    pg_amount = models.CharField("Сумма платежа*", max_length=200, blank=True, null=True)
-    pg_description = models.TextField("Описание*", blank=True, null=True)
-    pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-    pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-    # not required
-    pg_currency = models.CharField("Валюта платежа/перевода", max_length=200, blank=True, null=True, default="KZT")
-    pg_check_url = models.CharField("URL для проверки платежа", max_length=200, blank=True, null=True)
-    pg_result_url = models.CharField("URL для сообщения о результате платежа", max_length=200, blank=True, null=True)
-    pg_refund_url = models.CharField("URL для возврата платежа", max_length=200, blank=True, null=True)
-    pg_request_method = models.CharField("Метод отправки данных", max_length=200, blank=True, null=True)
-    pg_success_url = models.CharField("URL успешной оплаты", max_length=200, blank=True, null=True)
-    pg_failure_url = models.CharField("URL неуспешной оплаты", max_length=200, blank=True, null=True)
-    pg_success_url_method = models.CharField("Метод отправки данных для успешной оплаты", max_length=200, blank=True, null=True)
-    pg_failure_url_method = models.CharField("Метод отправки данных для неуспешной оплаты", max_length=200, blank=True, null=True)
-    pg_state_url = models.CharField("URL для получения статуса платежа", max_length=200, blank=True, null=True)
-    pg_state_url_method = models.CharField("Метод отправки данных для получения статуса платежа", max_length=200, blank=True, null=True)
-    pg_site_url = models.CharField("URL сайта", max_length=200, blank=True, null=True)
-    pg_payment_system = models.CharField("Платежная система", max_length=200, blank=True, null=True)
-    pg_lifetime = models.CharField("Время жизни счета", max_length=200, blank=True, null=True)
-    pg_user_phone = models.CharField("Телефон пользователя в системе продавца", max_length=200, blank=True, null=True)
-    pg_user_contact_email = models.CharField("Email пользователя в системе продавца", max_length=200, blank=True, null=True)
-    pg_user_ip = models.CharField("IP пользователя в системе продавца", max_length=200, blank=True, null=True)  
-    pg_postpone_payment = models.CharField("Отложенный платеж", max_length=200, blank=True, null=True)  # 1 - отложенный платеж, 0 - обычный платеж
-    pg_language = models.CharField("Язык платежной страницы", max_length=200, blank=True, null=True)
-    pg_testing_mode = models.CharField("Тестовый режим", max_length=200, blank=True, null=True) # 1 - тестовый режим, 0 - боевой режим
-    pg_user_id = models.CharField("ID пользователя в системе продавца", max_length=200, blank=True, null=True)
-    pg_recurring_start = models.CharField("Дата начала рекуррентных платежей", max_length=200, blank=True, null=True)
-    pg_recurring_lifetime = models.CharField("Время жизни рекуррентных платежей", max_length=200, blank=True, null=True)
-    # pg_receipt_positions = models.CharField("Позиции чека", max_length=200, blank=True, null=True)
-    pg_param1 = models.CharField("Дополнительный параметр 1", max_length=200, blank=True, null=True)
-    pg_param2 = models.CharField("Дополнительный параметр 2", max_length=200, blank=True, null=True)
-    pg_param3 = models.CharField("Дополнительный параметр 3", max_length=200, blank=True, null=True)
-    pg_auto_clearing = models.CharField("Автоматическая очистка платежей", max_length=200, blank=True, null=True)
-    pg_payment_method = models.CharField("Способ оплаты", max_length=200, blank=True, null=True)
-    '''
-    pg_payment_method:
-        wallet - Электронные деньги
-        internetbank - Интернет-банкинг
-        other - Терминалы
-        bankcard - Банковские карты
-        cash - Точки приема платежей
-        mobile_commerce - Мобильная коммерция
-
-    '''
-    pg_timeout_after_payment = models.CharField("Время жизни счета после оплаты", max_length=200, blank=True, null=True)
-    pg_generate_qr = models.CharField("Генерация QR-кода", max_length=200, blank=True, null=True) # 1 - генерация QR-кода, 0 - не генерировать QR-код
-    pg_3ds_challenge = models.CharField("3DS Challenge", max_length=200, blank=True, null=True) 
-
-    def __str__(self):
-        return f"Платеж #{self.pk}"
-
-    class Meta:
-        verbose_name = "Платеж"
-        verbose_name_plural = "Платежи"
-
-# class TransactionPaymentAcs(Timestamp):
-#     # transaction = models.ForeignKey(Transaction, verbose_name="Транзакция", on_delete=models.CASCADE, null=True, blank=True)
-#     # transaction = models.OneToOneField(Transaction, verbose_name="Транзакция", on_delete=models.CASCADE, null=True, blank=True)
-#     pg_payment_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-#     pg_payment_system = models.CharField("Платежная система", max_length=200, blank=True, null=True)
-#     pg_amount = models.CharField("Сумма платежа", max_length=200, blank=True, null=True)
-#     pg_currency = models.CharField("Валюта платежа/перевода", max_length=200, blank=True, null=True, default="KZT")
-#     pg_card_number = models.CharField("Номер карты", max_length=200, blank=True, null=True)
-#     pg_card_exp = models.CharField("Дата истечения срока карты", max_length=200, blank=True, null=True)
-#     pg_card_name = models.CharField("Имя плательщика", max_length=200, blank=True, null=True)
-#     pg_card_holder = models.CharField("Имя держателя карты", max_length=200, blank=True, null=True)
-#     pg_card_type = models.CharField("Тип карты", max_length=200, blank=True, null=True)
-#     pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-#     pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-
-
-class TransactionStatus(Timestamp):
-    pg_merchant_id = models.CharField("ID мерчанта", max_length=200, blank=True, null=True)
-    pg_payment_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-    pg_order_id = models.CharField("ID заказа", max_length=200, blank=True, null=True)
-    pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-    pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-
-    def __str__(self):
-        return f"Статус транзакции #{self.pk}"
-    
-    class Meta:
-        verbose_name = "Статус транзакции"
-        verbose_name_plural = "Статусы транзакций"
-
-
-class TransactionCancel(Timestamp):
-    pg_merchant_id = models.CharField("ID мерчанта", max_length=200, blank=True, null=True)
-    pg_payment_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-    pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-    pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-
-    def __str__(self):
-        return f"Отмена транзакции #{self.pk}"
-    
-    class Meta:
-        verbose_name = "Отмена транзакции"
-        verbose_name_plural = "Отмены транзакций"
-
-class TransactionRevoke(Timestamp):
-    pg_merchant_id = models.CharField("ID мерчанта", max_length=200, blank=True, null=True)
-    pg_payment_id = models.CharField("ID транзакции", max_length=200, blank=True, null=True)
-    pg_refund_amount = models.CharField("Сумма возврата. ", max_length=200, blank=True, null=True ,help_text="Если параметр не передан или передан 0, то возвращается вся сумма")
-    pg_salt = models.CharField("Случайная строка", max_length=200, blank=True, null=True)
-    pg_sig = models.CharField("Цифровая подпись запроса", max_length=200, blank=True, null=True)
-
-    def __str__(self):
-        return f"Возврат транзакции #{self.pk}"
-    
-    class Meta:
-        verbose_name = "Возврат транзакции"
-        verbose_name_plural = "Возвраты транзакций"
-
 
 class Ticket(Timestamp):
     full_name = models.CharField(max_length=50, blank=True)
@@ -330,4 +161,88 @@ class SMSMessage(Timestamp):
     class Meta:
         verbose_name = 'SMS сообщение'
         verbose_name_plural = 'SMS сообщения'
+        ordering = ['-created_at']
+
+# payload = {'pg_order_id': '123456789',
+# 'pg_payment_id': '12345',
+# 'pg_amount': '10',
+# 'pg_currency': 'KZT',
+# 'pg_ps_currency': 'KZT',
+# 'pg_ps_amount': '5',
+# 'pg_ps_full_amount': '5',
+# 'Параметры мерчанта': '',
+# 'pg_salt': 'some random string',
+# 'pg_sig': '{{paybox_signature}}'}
+
+class FreedomCheckRequest(Timestamp):
+    pg_order_id = models.CharField(max_length=50, blank=True, null=True)
+    pg_payment_id = models.CharField(max_length=50, blank=True, null=True)
+    pg_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_currency = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_currency = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_full_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_salt = models.CharField(max_length=50, blank=True, null=True)
+    pg_sig = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f'Freedom check request #{self.pk}'
+
+    class Meta:
+        verbose_name = 'Запрос на проверку платежа'
+        verbose_name_plural = 'Запросы на проверку платежа'
+        ordering = ['-created_at']
+
+# payload = {
+# 'pg_order_id': '123456789',
+# 'pg_payment_id': '12345',
+# 'pg_amount': '500',
+# 'pg_currency': 'KZT',
+# 'pg_net_amount': '482.5',
+# 'pg_ps_amount': '500',
+# 'pg_ps_full_amount': '500',
+# 'pg_ps_currency': 'KZT',
+# 'pg_description': 'Покупка в интернет магазине Site.kz',
+# 'pg_result': '1',
+# 'pg_payment_date': '2019-01-01 12:00:00',
+# 'pg_can_reject': '1',
+# 'pg_user_phone': '7077777777777',
+# 'pg_user_contact_email': 'mail@customer.kz',
+# 'pg_testing_mode': '1',
+# 'pg_captured': '0',
+# 'pg_card_pan': '5483-18XX-XXXX-0293',
+# 'Параметры мерчанта': '',
+# 'pg_salt': 'some random string',
+# 'pg_sig': '{{paybox_signature}}',
+# 'pg_payment_method': 'bankcard'
+# }
+
+class FreedomResultRequest(Timestamp):
+    pg_order_id = models.CharField(max_length=50, blank=True, null=True)
+    pg_payment_id = models.CharField(max_length=50, blank=True, null=True)
+    pg_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_currency = models.CharField(max_length=50, blank=True, null=True)
+    pg_net_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_full_amount = models.CharField(max_length=50, blank=True, null=True)
+    pg_ps_currency = models.CharField(max_length=50, blank=True, null=True)
+    pg_description = models.CharField(max_length=50, blank=True, null=True)
+    pg_result = models.CharField(max_length=50, blank=True, null=True)
+    pg_payment_date = models.CharField(max_length=50, blank=True, null=True)
+    pg_can_reject = models.CharField(max_length=50, blank=True, null=True)
+    pg_user_phone = models.CharField(max_length=50, blank=True, null=True)
+    pg_user_contact_email = models.CharField(max_length=50, blank=True, null=True)
+    pg_testing_mode = models.CharField(max_length=50, blank=True, null=True)
+    pg_captured = models.CharField(max_length=50, blank=True, null=True)
+    pg_card_pan = models.CharField(max_length=50, blank=True, null=True)
+    pg_salt = models.CharField(max_length=50, blank=True, null=True)
+    pg_sig = models.CharField(max_length=50, blank=True, null=True)
+    pg_payment_method = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f'Freedom result request #{self.pk}'
+
+    class Meta:
+        verbose_name = 'Запрос на результат платежа'
+        verbose_name_plural = 'Запросы на результат платежа'
         ordering = ['-created_at']
