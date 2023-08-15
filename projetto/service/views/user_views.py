@@ -146,7 +146,13 @@ class UserViewSet(mixins.UpdateModelMixin,
             if send_sms(username, password, recipient, message):
                 # Отправка SMS прошла успешно
                 # Сохраняем сообщение в базу данных
+                already_sent = SMSMessage.objects.filter(phone=recipient, sms_status='sent').exists()
+                
+                if(already_sent):
+                    return Response({'success': False, 'message': 'SMS уже отправлено'})
+                
                 SMSMessage.objects.create(phone=recipient, code=code, sms_status='sent')
+                
                 return Response({'success': True, 'message': 'SMS успешно отправлено'})
             else:
                 # Ошибка при отправке SMS
