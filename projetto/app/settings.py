@@ -148,8 +148,8 @@ AUTH_USER_MODEL = 'service.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
@@ -198,14 +198,14 @@ SIMPLE_JWT = {
 }
 
 SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-                'type': 'apiKey',
-                'name': 'Authorization',
-                'in': 'header'
-        }
-    },
+    # 'USE_SESSION_AUTH': False,
+    # 'SECURITY_DEFINITIONS': {
+    #     'Bearer': {
+    #             'type': 'apiKey',
+    #             'name': 'Authorization',
+    #             'in': 'header'
+    #     }
+    # },
     'DOC_EXPANSION': 'none',
     'OPERATIONS_SORTER': 'method',
 
