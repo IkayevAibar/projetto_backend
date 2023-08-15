@@ -227,6 +227,7 @@ auth_token = os.getenv('SMS_AUTH_TOKEN')
 verify_sid = os.getenv('SMS_VER_SID')
 
 sms_version_type = os.getenv('SMS_VER_TYPE')
+sms_version_send_type = os.getenv('SMS_VER_SEND_TYPE')
 
 sms_acc_sid_prod = os.getenv('SMS_ACC_SID_PROD')
 sms_acc_pass_prod = os.getenv('SMS_ACC_PASS_PROD')
