@@ -77,8 +77,6 @@ class Floor(Timestamp):
 
 class Apartment(Timestamp):
     name = models.CharField("Название", max_length=50, blank=True)
-    floor = models.ForeignKey("Floor", related_name='apartments', on_delete=models.CASCADE, blank=True)
-    exact_floor = models.IntegerField("Точный номер этажа", blank=True)
     door_number = models.CharField("Номер квартиры",max_length=50, blank=True, help_text="132")
     room_number = models.IntegerField("Количество комнат", blank=True)
     area = models.FloatField("Плошадь(m²)", blank=True)
