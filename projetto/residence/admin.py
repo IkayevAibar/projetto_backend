@@ -53,7 +53,7 @@ class ApartmentInline(admin.TabularInline):
     model = Apartment
     extra = 0
     show_change_link = True
-    fields = ('link','floor', 'door_number', 'exact_floor', 'room_number', 'area', 'layouts', 'created_at', 'updated_at')
+    fields = ('link', 'door_number', 'room_number', 'area', 'layouts', 'created_at', 'updated_at')
     readonly_fields = ('link', 'created_at', 'updated_at')
     
     def link(self, obj):
@@ -108,7 +108,6 @@ class FloorAdmin(admin.ModelAdmin):
     list_display = ('floor_numbers', 'created_at', 'updated_at')
     search_fields = ('floor_numbers', )
     autocomplete_fields = ['clusters']
-    inlines = [ApartmentInline]
 
 class LayoutAdmin(admin.ModelAdmin):
     list_display = ('custom_layout_display', 'name', 'variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
@@ -135,9 +134,8 @@ class LayoutAdmin(admin.ModelAdmin):
 
 
 class ApartmentAdmin(admin.ModelAdmin):
-    list_display = ('door_number', 'name', 'room_number', 'floor', 'exact_floor', 'created_at', 'updated_at')
-    search_fields = ('door_number', 'room_number', 'floor', 'exact_floor')
-    raw_id_fields = ['floor']
+    list_display = ('door_number', 'name', 'room_number', 'created_at', 'updated_at')
+    search_fields = ('door_number', 'room_number')
     filter_horizontal = ['layouts']
     inlines = [LayoutInline]
 
