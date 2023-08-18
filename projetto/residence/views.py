@@ -8,7 +8,9 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, City
-from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer, LayoutSerializer, CitySerializer
+from .serializers import ResidenceSerializer, ApartmentSerializer, AttachmentSerializer, ClusterSerializer, FloorSerializer \
+                        ,LayoutSerializer, CitySerializer \
+                        ,LayoutRetrieveSerializer
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -170,6 +172,16 @@ class LayoutViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = LayoutSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return LayoutRetrieveSerializer
+        return LayoutSerializer
+    
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [IsAuthenticated()]
+        return super().get_permissions()
 
 class AttachmentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Attachment.objects.all()

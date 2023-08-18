@@ -54,6 +54,16 @@ class FloorSerializer(serializers.ModelSerializer):
         serializer.save(updated_at=timezone.now())
 
 class LayoutSerializer(serializers.ModelSerializer):
+    # pdf = serializers.FileField(max_length=None, allow_empty_file=False, use_url=True)
+    class Meta:
+        model = Layout
+        exclude = ('pdf', )
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def perform_update(self, serializer):
+        serializer.save(updated_at=timezone.now())
+
+class LayoutRetrieveSerializer(serializers.ModelSerializer):
     pdf = serializers.FileField(max_length=None, allow_empty_file=False, use_url=True)
     class Meta:
         model = Layout
