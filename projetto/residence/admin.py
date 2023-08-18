@@ -22,7 +22,7 @@ class LayoutApartmentForm(forms.ModelForm):
 
     class Meta:
         model = Layout
-        fields = ['apartments', 'variant', 'type_of_apartment', 'pdf', 'price', 'room_number']
+        fields = ['apartments', 'variant', 'type_of_apartment', 'price', 'room_number', 'pdf', 'preview', 'before_view', 'after_view']
     
     # def __init__(self, *args, **kwargs):
     #     super(LayoutApartmentForm, self).__init__(*args, **kwargs)

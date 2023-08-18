@@ -103,6 +103,9 @@ class Layout(Timestamp):
     variant = models.IntegerField("Вариант", blank=True, help_text="Номер варианта которое отоборжается в планировке")
     type_of_apartment = models.CharField("Тип квартиры", choices=TYPE_CHOICES, max_length=100, blank=True)
     pdf = models.FileField("PDF", upload_to="PDF/", blank=True)
+    preview = models.ImageField("Превью", upload_to="preview/", blank=True)
+    before_view = models.ImageField("Вид до", upload_to="before_view/", blank=True)
+    after_view = models.ImageField("Вид после", upload_to="after_view/", blank=True)
     price = models.CharField(max_length=10, blank=True)
     room_number = models.IntegerField("Количество комнат", blank=True)
 
