@@ -116,7 +116,7 @@ class FloorViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'detail': 'Residence or Cluster not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Фильтруем этажи по переданным параметрам
-        floors = self.queryset.filter(cluster=cluster)
+        floors = self.queryset.filter(clusters__in=[cluster])
 
         # Сериализуем и возвращаем результат
         serializer = self.serializer_class(floors, many=True)
