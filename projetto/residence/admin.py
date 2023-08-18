@@ -111,7 +111,7 @@ class FloorAdmin(admin.ModelAdmin):
     inlines = [ApartmentInline]
 
 class LayoutAdmin(admin.ModelAdmin):
-    list_display = ('variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
+    list_display = ('custom_layout_display', 'variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
     search_fields = ('name', 'variant', 'type_of_apartment')
 
     form = LayoutApartmentForm
@@ -127,6 +127,11 @@ class LayoutAdmin(admin.ModelAdmin):
         extra_context['selected_apartment_ids'] = layout.apartments.values_list('id', flat=True)
         
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
+    def custom_layout_display(self, obj):
+        return f"{obj.id}. Планировка №{obj.id} {obj.room_number}.{obj.variant}/{obj.type_of_apartment}"
+    
+    custom_layout_display.short_description = 'Пользовательское отображение'
 
 
 class ApartmentAdmin(admin.ModelAdmin):
