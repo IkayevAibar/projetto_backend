@@ -76,6 +76,7 @@ class Floor(Timestamp):
 
 
 class Apartment(Timestamp):
+    name = models.CharField("Название", max_length=50, blank=True)
     floor = models.ForeignKey("Floor", related_name='apartments', on_delete=models.CASCADE, blank=True)
     exact_floor = models.IntegerField("Точный номер этажа", blank=True)
     door_number = models.CharField("Номер квартиры",max_length=50, blank=True, help_text="132")
@@ -99,7 +100,7 @@ class Layout(Timestamp):
         ('ver', 'Вертикальная'),
         ('hor', 'Горизонтальная'),
     )
-
+    name = models.CharField("Название", max_length=50, blank=True)
     variant = models.IntegerField("Вариант", blank=True, help_text="Номер варианта которое отоборжается в планировке")
     type_of_apartment = models.CharField("Тип квартиры", choices=TYPE_CHOICES, max_length=100, blank=True)
     pdf = models.FileField("PDF", upload_to="PDF/", blank=True)
@@ -115,7 +116,7 @@ class Layout(Timestamp):
         ordering = ['id']
 
     def __str__(self):
-        return f"{self.id}. Планировка №{self.id} {self.room_number}.{self.variant}/{self.type_of_apartment}"
+        return f"№{self.id}. Планировка {self.name} {self.room_number}.{self.variant}/{self.type_of_apartment}"
 
     def get_appartment(self, apartment_id):
         appartment = self.apartments.filter(id=apartment_id).first()

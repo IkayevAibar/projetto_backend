@@ -22,7 +22,7 @@ class LayoutApartmentForm(forms.ModelForm):
 
     class Meta:
         model = Layout
-        fields = ['apartments', 'variant', 'type_of_apartment', 'price', 'room_number', 'pdf', 'preview', 'before_view', 'after_view']
+        fields = ['apartments', 'name', 'variant', 'type_of_apartment', 'price', 'room_number', 'pdf', 'preview', 'before_view', 'after_view']
     
     # def __init__(self, *args, **kwargs):
     #     super(LayoutApartmentForm, self).__init__(*args, **kwargs)
@@ -111,7 +111,7 @@ class FloorAdmin(admin.ModelAdmin):
     inlines = [ApartmentInline]
 
 class LayoutAdmin(admin.ModelAdmin):
-    list_display = ('custom_layout_display', 'variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
+    list_display = ('custom_layout_display', 'name', 'variant', 'type_of_apartment', 'price', 'room_number', 'created_at', 'updated_at')
     search_fields = ('name', 'variant', 'type_of_apartment')
 
     form = LayoutApartmentForm
@@ -135,7 +135,7 @@ class LayoutAdmin(admin.ModelAdmin):
 
 
 class ApartmentAdmin(admin.ModelAdmin):
-    list_display = ('door_number', 'room_number', 'floor', 'exact_floor', 'created_at', 'updated_at')
+    list_display = ('door_number', 'name', 'room_number', 'floor', 'exact_floor', 'created_at', 'updated_at')
     search_fields = ('door_number', 'room_number', 'floor', 'exact_floor')
     raw_id_fields = ['floor']
     filter_horizontal = ['layouts']
