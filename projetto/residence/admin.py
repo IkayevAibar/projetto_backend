@@ -129,7 +129,7 @@ class LayoutAdmin(admin.ModelAdmin):
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
     def custom_layout_display(self, obj):
-        return f"{obj.id}. Планировка №{obj.id} {obj.room_number}.{obj.variant}/{obj.type_of_apartment}"
+        return f"№{obj.id}. Планировка {obj.name} {obj.room_number}.{obj.variant}/{obj.type_of_apartment}"
     
     custom_layout_display.short_description = 'Пользовательское отображение'
 
