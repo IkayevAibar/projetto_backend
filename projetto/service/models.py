@@ -13,7 +13,7 @@ import os
 from PyPDF2 import PdfFileWriter, PdfFileReader
 import io
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A3
+from reportlab.lib.pagesizes import A2
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
@@ -49,6 +49,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, verbose_name="ID Клиента", on_delete=models.CASCADE)
     flat_layout = models.ForeignKey("residence.Layout", verbose_name="ID Планировки", on_delete=models.CASCADE)
     apartment = models.ForeignKey("residence.Apartment", verbose_name="ID Квартиры", on_delete=models.CASCADE)
+    cluster = models.ForeignKey("residence.Cluster", verbose_name="ID Кластера", on_delete=models.CASCADE)
     doc = models.FileField("Договор", upload_to='docs/',null=True, blank=True)
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='created')
     created_at = models.DateTimeField("Создано", auto_now_add=True)
@@ -57,6 +58,7 @@ class Order(models.Model):
     @staticmethod
     def draw(can, text, x, y, font_size):
         can.setFont('OpenSans', font_size)
+        can.setFillColorRGB(0.85, 0.85, 0.85)
         text_width = can.stringWidth(text, 'OpenSans', font_size)
         text_height = font_size
         y = y 
@@ -65,8 +67,8 @@ class Order(models.Model):
 
     
     def generate_doc(self):
-        residence:Residence = self.apartment.floor.cluster.residence_id
-        cluster:Cluster = self.apartment.floor.cluster
+        residence:Residence = self.cluster.residence_id
+        cluster:Cluster = self.cluster
         apartment: Apartment = self.apartment
         layout: Layout = self.flat_layout
 
@@ -83,22 +85,20 @@ class Order(models.Model):
 
         packet = io.BytesIO()
 
-        can = canvas.Canvas(packet, pagesize=A3)
-        can.rotate(90)
+        can = canvas.Canvas(packet, pagesize=A2)
+        # can.rotate(90)
 
-        self.draw(can, 'Рабочий проект дизайн интерьера', 600, -430, 24)
-        self.draw(can, residence.title, 600, -525, 38)
-        self.draw(can, room_count + ": " + f"{residence.slug}/{cluster.name}/{apartment.exact_floor}/{layout.room_number}.{layout.variant}/{layout.type_of_apartment}" , 600, -575, 28)
-        self.draw(can, 'Владелец проекта:', 1000, -700, 24)
-        self.draw(can, self.user.full_name, 975, -735, 24)
-        self.draw(can, f'г. {residence.city.name} {current_year}', 675, -775, 24)
+        self.draw(can, 'Рабочий проект дизайн интерьера',  600, 390, 24)
+        self.draw(can, residence.title, 600, 325, 38)
+        self.draw(can, room_count + ": " + f"{residence.slug}/{cluster.name}/{layout.room_number}.{layout.variant}/{layout.type_of_apartment}" , 600, 275, 28)
+        self.draw(can, self.user.full_name, 975, 85, 24)
         
         can.save()
 
         packet.seek(0)
 
         new_pdf = PdfFileReader(packet)
-        existing_pdf = PdfFileReader(open("./utils/project_free.pdf", "rb"))
+        existing_pdf = PdfFileReader(open("./utils/projetto_titul.pdf", "rb"))
         output = PdfFileWriter()
 
         page = existing_pdf.pages[0]
