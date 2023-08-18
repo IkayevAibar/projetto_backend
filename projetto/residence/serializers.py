@@ -3,7 +3,6 @@ from .models import Residence, Apartment, Attachment, Cluster, Floor, Layout, Ci
 from datetime import timezone
 class ResidenceSerializer(serializers.ModelSerializer):
     city_name = serializers.StringRelatedField(source='city.name')
-    layout_counts = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
     class Meta:
         model = Residence
@@ -12,9 +11,6 @@ class ResidenceSerializer(serializers.ModelSerializer):
     
     def perform_update(self, serializer):
         serializer.save(updated_at=timezone.now())
-
-    def get_layout_counts(self, obj):
-        return Layout.objects.filter(apartments__floor__cluster__residence_id=obj).count()
 
     def get_attachments(self, obj):
         attachments = Attachment.objects.filter(residence_id=obj.id)
