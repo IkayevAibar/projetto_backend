@@ -75,14 +75,14 @@ class AttachmentInline(admin.TabularInline):
     extra = 0
 
 class FloorInline(admin.TabularInline):
-    model = Floor
+    model = Cluster.floors.through
     extra = 0
-    fields = ('link','floor_numbers', 'cluster', 'scheme', 'created_at', 'updated_at')
-    readonly_fields = ('link', 'created_at', 'updated_at')
+    # fields = ('link','floor_numbers', 'clusters', 'scheme', 'created_at', 'updated_at')
+    # readonly_fields = ('link', 'created_at', 'updated_at')
     
-    def link(self, obj):
-        return format_html('<a href="{}">ID:{}</a>', reverse('admin:residence_floor_change', args=[obj.id]), obj.id)
-    link.short_description = 'ID'
+    # def link(self, obj):
+    #     return format_html('<a href="{}">ID:{}</a>', reverse('admin:residence_floor_change', args=[obj.id]), obj.id)
+    # link.short_description = 'ID'
 
 #--------------------------------------------------------------------------------------------------------------
 class CityAdmin(admin.ModelAdmin):
@@ -100,12 +100,14 @@ class ClusterAdmin(admin.ModelAdmin):
     search_fields = ('name', 'residence_id')
     autocomplete_fields = ['residence_id']
     inlines = [FloorInline]
+    actions = ['duplicate_floors']
+
 
 class FloorAdmin(admin.ModelAdmin):
     
-    list_display = ('floor_numbers', 'cluster', 'created_at', 'updated_at')
-    search_fields = ('floor_numbers', 'cluster')
-    autocomplete_fields = ['cluster']
+    list_display = ('floor_numbers', 'created_at', 'updated_at')
+    search_fields = ('floor_numbers', )
+    autocomplete_fields = ['clusters']
     inlines = [ApartmentInline]
 
 class LayoutAdmin(admin.ModelAdmin):

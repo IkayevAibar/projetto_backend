@@ -65,14 +65,14 @@ class Cluster(Timestamp):
 
 class Floor(Timestamp):
     floor_numbers = models.CharField("Номера Этажей",max_length=50, blank=True, help_text="Пример: 1,2,3")
-    cluster = models.ForeignKey("Cluster", related_name='floors', on_delete=models.CASCADE, blank=True)
+    clusters = models.ManyToManyField("Cluster", related_name='floors', blank=True)
     scheme = models.FileField("Схема", upload_to='floor/schemes/', blank=True)
     class Meta:
         verbose_name = 'Этаж'
         verbose_name_plural = 'Этажи'
     
     def __str__(self):
-        return f"Этажи {self.floor_numbers} из Блока {self.cluster.name}"
+        return f"Этажи {self.floor_numbers}"
 
 
 class Apartment(Timestamp):
@@ -89,7 +89,7 @@ class Apartment(Timestamp):
         ordering = ['id']
     
     def __str__(self):
-        return f"{self.id}. Квартира №{self.door_number} из этажов {self.floor.floor_numbers} из Блока {self.floor.cluster.name} из {self.floor.cluster.residence_id.title}"
+        return f"{self.id}. Квартира №{self.door_number} из этажов {self.floor.floor_numbers}"
 
 
 
