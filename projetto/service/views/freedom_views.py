@@ -20,6 +20,7 @@ class FreedomCheckRequestViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def check_url(self, request):
+        """Проверка платежа"""
         serializer = FreedomCheckRequestSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -56,6 +57,7 @@ class FreedomResultRequestViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def result_url(self, request):
+        """Проверка платежа"""
         serializer = FreedomResultRequestSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

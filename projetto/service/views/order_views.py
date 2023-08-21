@@ -17,6 +17,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], permission_classes = [AllowAny])
     def generate_pdf(self, request, pk=None):
+        """Генерация pdf"""
         if pk is None:
             return Response({'message': "order id is required"})
 

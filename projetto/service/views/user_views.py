@@ -58,6 +58,7 @@ class UserViewSet(mixins.UpdateModelMixin,
     
     @staticmethod
     def get_or_create_user(phone_number):
+        """Получение или создание пользователя c auth token'ом"""
         user = None
         try:
             user = User.objects.get(username=phone_number)
@@ -84,6 +85,8 @@ class UserViewSet(mixins.UpdateModelMixin,
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
     def verify_sms_and_authorization(self, request, pk=None):
+        """ Потверждение номера телефона и регистрация пользователя """
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         verified_number = serializer.validated_data.get('phone_number')
@@ -126,6 +129,8 @@ class UserViewSet(mixins.UpdateModelMixin,
     )
     @action(detail=False, methods=['post'], permission_classes = [AllowAny])
     def send_sms_to_phone(self, request, pk=None):
+        """ Отправка SMS с кодом подтверждения на номер телефона """
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         verified_number = serializer.validated_data.get('phone_number')
@@ -145,12 +150,13 @@ class UserViewSet(mixins.UpdateModelMixin,
 
             if send_sms(username, password, recipient, message):
                 # Отправка SMS прошла успешно
-                # Сохраняем сообщение в базу данных
+
+                # Проверяем, было ли уже отправлено сообщение на этот номер
                 already_sent = SMSMessage.objects.filter(phone=recipient, sms_status='sent').exists()
-                
                 if(already_sent):
                     return Response({'success': False, 'message': 'SMS уже отправлено'})
                 
+                # Сохраняем сообщение в базу данных
                 SMSMessage.objects.create(phone=recipient, code=code, sms_status='sent')
                 
                 return Response({'success': True, 'message': 'SMS успешно отправлено'})
@@ -171,6 +177,7 @@ class UserViewSet(mixins.UpdateModelMixin,
 
     @action(detail=True, methods=['get'])
     def get_all_orders(self, request, pk=None):
+        """Получение всех заказов пользователя"""
         status = request.query_params.get('status')
 
         orders = Order.objects.filter(user=pk) #, status='paid')
@@ -187,6 +194,7 @@ class UserViewSet(mixins.UpdateModelMixin,
     )
     @action(detail=False, methods=['post'])
     def restore_password(self, request):
+        """Восстановление пароля"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         phone = serializer.validated_data.get('phone')
@@ -239,6 +247,7 @@ class UserViewSet(mixins.UpdateModelMixin,
     )
     @action(detail=False, methods=['post'])
     def set_password(self, request):
+        """Установка пароля"""
         serializer = SetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_id = serializer.validated_data.get('user_id')

@@ -37,6 +37,7 @@ class ResidenceViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=True, methods=['get'])
     def clusters(self, request, pk=None):
+        """Возвращает список пятен в жилом комплексе"""
         residence = self.get_object()
         clusters = residence.clusters.all()
         serializer = ClusterSerializer(clusters, many=True)
@@ -44,6 +45,7 @@ class ResidenceViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=True, methods=['get'])
     def get_residence_tree(self, request, pk=None):
+        """Возвращает дерево квартир в формате JSON"""
         residence = self.get_object()
         clusters = residence.clusters.all()
 
@@ -80,6 +82,7 @@ class ClusterViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['get'])
     def floors(self, request, pk=None):
+        """Возвращает список этажей пятна"""
         cluster = self.get_object()
         floors = cluster.floors.all()
         serializer = FloorSerializer(floors, many=True)
@@ -92,6 +95,7 @@ class FloorViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=True, methods=['get'])
     def apartments(self, request, pk=None):
+        """Возвращает список квартир этажа"""
         floor = self.get_object()
         apartments = floor.apartments.all()
         serializer = ApartmentSerializer(apartments, many=True)
@@ -102,6 +106,7 @@ class FloorViewSet(viewsets.ReadOnlyModelViewSet):
         openapi.Parameter('cluster_id', openapi.IN_QUERY, description="ID of the cluster", type=openapi.TYPE_INTEGER),
     ])
     def list(self, request, *args, **kwargs):
+        """Возвращает список этажей, отфильтрованных по переданным параметрам"""
         # Получаем переданные параметры из запроса
         residence_id = request.query_params.get('residence_id')
         cluster_id = request.query_params.get('cluster_id')
@@ -131,6 +136,7 @@ class ApartmentViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['get'])
     def layouts(self, request, pk=None):
+        """Возвращает список планировок квартиры"""
         apartment = self.get_object()
         layouts = apartment.layouts.all()
         serializer = LayoutSerializer(layouts, many=True)
@@ -142,6 +148,7 @@ class ApartmentViewSet(viewsets.ReadOnlyModelViewSet):
         openapi.Parameter('floor_id', openapi.IN_QUERY, description="ID of the floor", type=openapi.TYPE_INTEGER),
     ])
     def list(self, request, *args, **kwargs):
+        """Возвращает список квартир, отфильтрованных по переданным параметрам"""
         # Получаем переданные параметры из запроса
         residence_id = request.query_params.get('residence_id')
         cluster_id = request.query_params.get('cluster_id')
