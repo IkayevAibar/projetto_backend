@@ -199,13 +199,13 @@ SIMPLE_JWT = {
 
 SWAGGER_SETTINGS = {
     # 'USE_SESSION_AUTH': False,
-    # 'SECURITY_DEFINITIONS': {
-    #     'Bearer': {
-    #             'type': 'apiKey',
-    #             'name': 'Authorization',
-    #             'in': 'header'
-    #     }
-    # },
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+                'type': 'apiKey',
+                'name': 'Authorization',
+                'in': 'header'
+        }
+    },
     'DOC_EXPANSION': 'none',
     'OPERATIONS_SORTER': 'method',
 
